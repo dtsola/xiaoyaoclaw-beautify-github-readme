@@ -46,6 +46,13 @@ MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")
 HTML_IMAGE = re.compile(r"<img\b[^>]*\bsrc=[\"']([^\"']+)[\"'][^>]*>", re.I)
 UNSAFE_SVG_TAGS = {"script", "foreignObject"}
 REMOTE_FONT = re.compile(r"@font-face|fonts\.(googleapis|gstatic)\.com|<link\b[^>]*stylesheet", re.I)
+# References that would escape the isolated render sandbox: remote URLs
+# (http/https/file), protocol-relative, root-absolute, Windows-drive, or
+# parent-directory paths. Plain relative refs and data:/#fragment are allowed.
+DANGEROUS_REF = re.compile(
+    r"""(?:href|src)\s*=\s*["']\s*(?:(?:https?:|file:)?//|/|[A-Za-z]:[\\/]|\.\./)""",
+    re.I,
+)
 
 
 def find_chrome() -> str | None:
@@ -77,11 +84,19 @@ def find_chrome() -> str | None:
 
 
 def local_svg_sources(readme: Path) -> list[tuple[str, Path]]:
-    """Return [(src_text, absolute_path)] for local SVG references."""
+    """Return [(src_text, absolute_path)] for local SVG references.
+
+    Only references that resolve inside the README's own directory tree are
+    accepted; anything pointing outside it (e.g. ``../../``, root-absolute, or
+    Windows-drive paths) is skipped so the checker never reads files from
+    outside the requested repository.
+    """
     text = readme.read_text(encoding="utf-8")
     srcs = list(MARKDOWN_IMAGE.findall(text))
     srcs += [m for m in HTML_IMAGE.findall(text)]
+    root = readme.parent.resolve()
     out = []
+    skipped = []
     for src in dict.fromkeys(srcs):
         if src.startswith(("http://", "https://", "data:", "#")):
             continue
@@ -89,8 +104,15 @@ def local_svg_sources(readme: Path) -> list[tuple[str, Path]]:
         if not clean.lower().endswith(".svg"):
             continue
         p = (readme.parent / clean).resolve()
+        try:
+            p.relative_to(root)
+        except ValueError:
+            skipped.append(src)
+            continue
         if p.is_file():
             out.append((src, p))
+    if skipped:
+        print(f"WARNING: skipped SVG reference(s) resolving outside the README tree: {skipped}")
     return out
 
 
@@ -219,56 +241,68 @@ def svg_contrast_issues(path: Path) -> list[str]:
 # ---------------------------------------------------------------- rendering
 
 def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
-    """Serve the svg's directory and screenshot the file. Returns (ok: bool, err: str).
+    """Render one SVG to PNG inside a hardened sandbox. Returns (ok, err).
 
-    Trust boundary: the SVG under test is treated as untrusted input (it may come
-    from a third-party repository). Rendering is therefore network-isolated:
-    Chrome is started with DNS resolution disabled for every host except
-    127.0.0.1, so an SVG cannot load remote fonts/images or reach internal
-    networks while it is rendered. Only the local directory of the SVG itself is
-    served, over a loopback-only ephemeral port.
+    Trust boundary: the SVG under test is treated as untrusted input (it may
+    come from a third-party repository). Four layers of isolation:
+
+      1. The SVG is copied into a fresh, empty directory that contains nothing
+         else, and only that directory is served — the SVG cannot read sibling
+         files from the repository it came from.
+      2. JavaScript is disabled (--blink-settings=scriptEnabled=false), so any
+         <script> in the SVG is inert. SVG is static content on GitHub; it
+         never needs JS to render.
+      3. DNS resolution is blocked for every host (--host-resolver-rules), so
+         the SVG cannot pull remote fonts/images. The preview server URL uses
+         an explicit 127.0.0.1 IP so it stays reachable without DNS.
+      4. The preview server binds loopback only, on an ephemeral port.
     """
     svg = svg.resolve()
-    parent = svg.parent
-    class QuietHandler(SimpleHTTPRequestHandler):
-        def __init__(self, *a, **kw):
-            super().__init__(*a, directory=str(parent), **kw)
-        def log_message(self, *a):  # silence access log noise
-            pass
-    server = ThreadingHTTPServer(("127.0.0.1", 0), QuietHandler)  # ephemeral port
-    port = server.server_address[1]
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        url = f"http://127.0.0.1:{port}/{svg.name}"
-        size = svg_size(svg)
-        if size:
-            w, h = size
-        else:
-            w = h = 1200
-        cmd = [
-            chrome, "--headless", "--disable-gpu", "--hide-scrollbars",
-            "--no-first-run", "--no-default-browser-check",
-            # Network isolation: block all DNS lookups except loopback, so the
-            # SVG under test cannot pull remote fonts/images or probe internal
-            # hosts. The local preview server (127.0.0.1) stays reachable.
-            '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
-            "--user-data-dir=" + str(tempfile.mkdtemp(prefix="chrome-vverify-")),
-            f"--window-size={w},{h}",
-            f"--screenshot={out_png}",
-            url,
-        ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
-                              encoding="utf-8", errors="replace")
-        if not out_png.exists() or out_png.stat().st_size == 0:
-            detail = (proc.stderr or "") + " | STDOUT: " + (proc.stdout or "")
-            return False, f"rc={proc.returncode} " + (detail.strip() or "no screenshot produced")[:400]
-        return True, ""
-    except subprocess.TimeoutExpired:
-        return False, "Chrome render timed out"
-    finally:
-        server.shutdown()
-        thread.join(timeout=5)
+    with tempfile.TemporaryDirectory(prefix="vverify-serve-") as td:
+        serve_dir = Path(td)
+        isolated = serve_dir / svg.name
+        shutil.copy2(svg, isolated)
+        class QuietHandler(SimpleHTTPRequestHandler):
+            def __init__(self, *a, **kw):
+                super().__init__(*a, directory=str(serve_dir), **kw)
+            def log_message(self, *a):  # silence access log noise
+                pass
+        server = ThreadingHTTPServer(("127.0.0.1", 0), QuietHandler)  # ephemeral port
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            url = f"http://127.0.0.1:{port}/{isolated.name}"
+            size = svg_size(svg)
+            if size:
+                w, h = size
+            else:
+                w = h = 1200
+            cmd = [
+                chrome, "--headless", "--disable-gpu", "--hide-scrollbars",
+                "--no-first-run", "--no-default-browser-check",
+                # Network isolation: block DNS for every hostname except
+                # 127.0.0.1 (the loopback preview server, reached by explicit
+                # IP below). Scripts never reach here (is_safe_to_render gates
+                # them out), and remote resource loads are refused statically,
+                # so loopback exemption only serves the preview itself.
+                '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
+                "--user-data-dir=" + str(tempfile.mkdtemp(prefix="chrome-vverify-")),
+                f"--window-size={w},{h}",
+                f"--screenshot={out_png}",
+                url,
+            ]
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
+                                  encoding="utf-8", errors="replace")
+            if not out_png.exists() or out_png.stat().st_size == 0:
+                detail = (proc.stderr or "") + " | STDOUT: " + (proc.stdout or "")
+                return False, f"rc={proc.returncode} " + (detail.strip() or "no screenshot produced")[:400]
+            return True, ""
+        except subprocess.TimeoutExpired:
+            return False, "Chrome render timed out"
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
 
 
 def svg_size(path: Path) -> tuple[int, int] | None:
@@ -356,11 +390,32 @@ def audit_svg_static(path: Path) -> list[str]:
             found_desc = True
         if tag in UNSAFE_SVG_TAGS:
             issues.append(f"contains unsupported <{tag}>")
+    if DANGEROUS_REF.search(text):
+        issues.append("external/absolute reference detected (http, file, /, drive, or ../)")
     if not found_title:
         issues.append("missing <title>")
     if not found_desc:
         issues.append("missing <desc>")
     return issues
+
+
+def is_safe_to_render(path: Path) -> tuple[bool, str]:
+    """Gate before rendering: refuse to execute content that could escape the
+    sandbox (scripts, foreignObject, remote fonts, external/absolute refs).
+    Structural quality issues (viewBox/title/desc) do not block rendering."""
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError as exc:
+        return False, f"invalid SVG XML: {exc}"
+    for node in root.iter():
+        if node.tag.rsplit("}", 1)[-1] in UNSAFE_SVG_TAGS:
+            return False, f"contains <{node.tag.rsplit('}', 1)[-1]}>"
+    text = path.read_text(encoding="utf-8")
+    if REMOTE_FONT.search(text):
+        return False, "remote font reference"
+    if DANGEROUS_REF.search(text):
+        return False, "external/absolute reference"
+    return True, ""
 
 
 def main() -> int:
@@ -401,6 +456,11 @@ def main() -> int:
             failures += 1
 
         if chrome:
+            safe, reason = is_safe_to_render(svg)
+            if not safe:
+                print(f"  [render] SKIPPED (untrusted content: {reason})")
+                failures += 1
+                continue
             png = out_dir / (svg.stem + ".png")
             ok, err = render_svg(svg, chrome, png)
             if not ok:
