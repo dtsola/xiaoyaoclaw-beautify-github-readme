@@ -16,10 +16,23 @@ UNSAFE_SVG_TAGS = {"script", "foreignObject"}
 
 
 def local_target(src: str, base: Path) -> Path | None:
-    if src.startswith(("http://", "https://", "data:", "#")):
+    """Resolve a local image reference, or None when it is not local.
+
+    References that resolve outside ``base``'s directory tree (``../..``,
+    root-absolute, Windows-drive, or file:// paths) are refused so a README
+    cannot trick the audit into probing or reading files outside the project
+    folder. Remote (http/https), data: and fragment references are skipped.
+    """
+    if src.startswith(("http://", "https://", "data:", "#", "file:")):
         return None
     clean = src.split("#", 1)[0].split("?", 1)[0]
-    return (base / clean).resolve()
+    root = base.resolve()
+    p = (base / clean).resolve()
+    try:
+        p.relative_to(root)
+    except ValueError:
+        return None
+    return p
 
 
 def audit_svg(path: Path) -> list[str]:
