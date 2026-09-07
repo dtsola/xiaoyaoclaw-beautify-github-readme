@@ -118,7 +118,6 @@ xiaoyaoclaw-beautify-github-readme/
 │   ├── motion-production.md    # GitHub-safe GIF 制作
 │   ├── github-readme-canvas.md # 画布与排版规范
 │   ├── content-architecture.md # 文案顺序与删减规则
-│   └── showcase-contribution.md# 案例收录与归因
 ├── scripts/
 │   ├── visual_verify.py        # 渲染级验证（Chrome 无头 + WCAG + 贴边）★升级
 │   ├── audit_readme.py         # 静态审计

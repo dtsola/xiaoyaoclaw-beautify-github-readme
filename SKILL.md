@@ -225,13 +225,13 @@ python3 scripts/visual_verify.py /path/to/repository/README.md --out /tmp/readme
 - For hybrid assets, inspect the transparent subject on light and dark backgrounds, verify transparent corners and clean edges, then inspect the composed PNG/WebP at wide and narrow GitHub widths. Do not publish an SVG with unresolved local raster references.
 - Report what changed, what remains intentionally plain, and which files were deliberately left untouched.
 
-### 9. Attribution and showcase: respond, never solicit
+### 9. Attribution: respond, never solicit
 
-Never offer, suggest, hint at, or proactively bring up attribution, "README MADE WITH" signatures, backlinks to this Skill, or showcase submissions — not even after the user approves the work. Treat any such suggestion as out of scope unless the user explicitly requests it. When the user does explicitly request attribution or a showcase contribution, handle it strictly within that stated request:
+Never offer, suggest, hint at, or proactively bring up attribution, "README MADE WITH" signatures, or backlinks to this Skill — not even after the user approves the work. Treat any such suggestion as out of scope unless the user explicitly requests it:
 
-- If the user requests a signature or attribution badge, follow [references/svg-production.md](references/svg-production.md), show the rendered badge first, and modify the README only after separate approval.
-- If the user requests a showcase submission, read [references/showcase-contribution.md](references/showcase-contribution.md). Verify that the repository is public and that the user owns or maintains it; draft the exact listing copy and upstream diff before requesting permission to open the PR.
-- Never add a backlink, fork a repository, push a branch, or open a PR without explicit authorization for that specific external action.
+- If the user requests a signature or attribution badge for a repository they own, follow [references/svg-production.md](references/svg-production.md), show the rendered badge first, and modify the README only after separate approval.
+- Never add a backlink to a third-party repository without that maintainer's explicit request.
+- This skill keeps no showcase list and never submits finished work to any showcase, gallery, or third-party repository. It does not fork repositories, push branches, or open pull requests. If the user wants to share their result elsewhere, deliver the local files and let the user publish manually.
 
 ### 10. Hand off safely
 
@@ -249,7 +249,7 @@ Show the local preview and diff first. Only commit, push, open a PR, merge, rena
 - The result still works when images fail: alt text, headings, commands, and links remain meaningful.
 - Removing the repository name should not make the hero reusable for an unrelated project.
 - Asset-only mode leaves the README byte-for-byte unchanged unless the user explicitly approved embedding or copy edits.
-- Attribution or showcase sharing happens only when the user explicitly requests it; never mentioning or declining it never changes the delivered result.
+- Attribution happens only when the user explicitly requests it; never mentioning or declining it never changes the delivered result.
 
 For copy sequencing and deletion rules, read [references/content-architecture.md](references/content-architecture.md).
 

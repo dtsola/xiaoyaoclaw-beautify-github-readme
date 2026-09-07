@@ -1,4 +1,0 @@
-interface:
-  display_name: "OpenClaw Beautify Github Readme"
-  short_description: "OpenClaw skill for GitHub README makeovers: redesign repo homepages or craft pure-SVG heroes, section headers, badges & motion assets, with render-level visual verification built in. 面向 OpenClaw 的 GitHub README 视觉美化技能：重新设计仓库主页或制作 SVG hero、章节标题、徽章、动效等视觉素材，内置渲染级视觉验证。"
-  default_prompt: "Use $xiaoyaoclaw-beautify-github-readme to redesign my README or create visual assets; ask which scope I want, then explain and confirm pure SVG versus hybrid SVG composition when both fit."

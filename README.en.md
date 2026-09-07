@@ -114,7 +114,6 @@ xiaoyaoclaw-beautify-github-readme/
 │   ├── motion-production.md    # GitHub-safe GIF production
 │   ├── github-readme-canvas.md # Canvas & typography scale
 │   ├── content-architecture.md # Copy sequencing & deletion rules
-│   └── showcase-contribution.md# Showcase & attribution
 ├── scripts/
 │   ├── visual_verify.py        # Render-level verification ★upgrade
 │   ├── audit_readme.py         # Static audit
