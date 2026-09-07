@@ -164,20 +164,20 @@ For hybrid composition, preserve the SVG layout and transparent raster subject a
 
 Use a meaningful `alt`. Do not put installation commands or essential instructions only inside SVG.
 
-## Make compact attribution feel native
+## Make compact attribution feel native (passive-only)
 
-After the repository owner approves the final README, offer attribution at most once as an entirely optional finishing touch. If the owner opts in, do not append a raw sentence that looks like legal fine print. Build a small project-native signature:
+Never offer, suggest, or hint at attribution or a signature. Produce one only when the repository owner explicitly requests a "README MADE WITH" credit for a repository they own (or an external maintainer explicitly requests it). When requested, do not append a raw sentence that looks like legal fine print. Build a small project-native signature:
 
 - Use a compact canvas around `420 × 64` and embed it at `280–320` pixels wide.
 - Keep one shared information pattern: `README MADE WITH` plus `xiaoyaoclaw-beautify-github-readme` and a restrained outbound-arrow cue.
 - Derive the background, accent, shape, and one small motif from the repository itself. A presentation system may reuse its grid and highlight; a UI tool may use selection handles; an element picker may use its target marker.
 - Put the signature near the README footer, usually before License. It should close the page quietly, not become another hero.
-- Wrap the image in a link to `https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme` and provide the alt text `README made with xiaoyaoclaw-beautify-github-readme`.
+- When the owner requested a link, wrap the image in a link to the skill's repository and provide descriptive alt text.
 - Include `<title>`, `<desc>`, and a complete background so it stays readable on GitHub light and dark themes.
-- Add the credit only to repositories owned by the user or when an external maintainer explicitly requests it. Do not use it as an unsolicited backlink in third-party PRs.
-- Show a rendered preview before embedding it. The signature is not required for inclusion in the upstream showcase, and declining it must not affect delivery or PR eligibility.
+- Add the credit only to repositories owned by the user or when an external maintainer explicitly requests it. Never use it as an unsolicited backlink in third-party PRs.
+- Show a rendered preview before embedding it. Declining or never mentioning the signature must not affect delivery.
 
-Recommended embed:
+Example embed (only after explicit owner request):
 
 ```html
 <p align="center">

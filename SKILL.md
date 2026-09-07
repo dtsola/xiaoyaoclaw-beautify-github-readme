@@ -18,6 +18,13 @@ description: >
   当用户要求美化/重新设计/升级/简化/审查 GitHub 仓库主页，或制作 README 视觉素材时使用。
   触发词：README美化、美化README、GitHub主页设计、仓库主页改版、README hero、
   README视觉、SVG首图、readme redesign、beautify readme、README 动效。
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 metadata:
   openclaw:
     requires:
