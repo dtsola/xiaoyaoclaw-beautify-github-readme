@@ -90,10 +90,10 @@ GitHub README 不能像网站一样自由使用 CSS。这个 Skill 把视觉层�
 
 具体怎么从项目内容设计标题、怎么写这些 SVG，已经整理成两份可以直接照着执行的规范：
 
-- [怎么从项目内容设计标题](./skills/xiaoyaoclaw-beautify-github-readme/references/project-native-hero.md)
-- [README SVG 的写法](./skills/xiaoyaoclaw-beautify-github-readme/references/svg-production.md)
-- [SVG 与 AI 生图的混合式构图](./skills/xiaoyaoclaw-beautify-github-readme/references/hybrid-svg-production.md)
-- [README 动效的制作方法](./skills/xiaoyaoclaw-beautify-github-readme/references/motion-production.md)
+- [怎么从项目内容设计标题](./references/project-native-hero.md)
+- [README SVG 的写法](./references/svg-production.md)
+- [SVG 与 AI 生图的混合式构图](./references/hybrid-svg-production.md)
+- [README 动效的制作方法](./references/motion-production.md)
 
 <p align="center">
   <img src="./assets/readme/workflow.svg" width="100%" alt="理解项目、确定主题、重组内容、制作视觉、预览确认五步工作流。">

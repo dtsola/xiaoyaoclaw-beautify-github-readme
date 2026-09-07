@@ -90,10 +90,10 @@ The result can feel designed without becoming one long image that nobody can sea
 
 The reusable production guidance lives here:
 
-- [Designing a project-native hero](./skills/xiaoyaoclaw-beautify-github-readme/references/project-native-hero.md)
-- [Writing GitHub-safe README SVGs](./skills/xiaoyaoclaw-beautify-github-readme/references/svg-production.md)
-- [Composing SVG with generated raster material](./skills/xiaoyaoclaw-beautify-github-readme/references/hybrid-svg-production.md)
-- [Producing GitHub-safe README motion](./skills/xiaoyaoclaw-beautify-github-readme/references/motion-production.md)
+- [Designing a project-native hero](./references/project-native-hero.md)
+- [Writing GitHub-safe README SVGs](./references/svg-production.md)
+- [Composing SVG with generated raster material](./references/hybrid-svg-production.md)
+- [Producing GitHub-safe README motion](./references/motion-production.md)
 
 <p align="center">
   <img src="./assets/readme/en/workflow.svg" width="100%" alt="Understand the project, set the direction, structure the content, build the visuals, and review the preview.">
