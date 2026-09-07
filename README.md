@@ -149,16 +149,3 @@ MIT — 基于 [beautify-github-readme](https://github.com/oil-oil/beautify-gith
 </p>
 
 <p align="center">扫码加群，或添加微信 <code>dtsola</code>（备注：<b>加群</b>）</p>
-
-## 姊妹项目
-
-- 🏠 **xiaoyaoclaw-workspace-initializer**（工作区初始化器）：给每个 agent 一个「家」——标准目录结构 + WORKSPACE.md 规范 + 多 agent 配置安全。<https://github.com/dtsola/xiaoyaoclaw-workspace-initializer>
-- 🧠 **xiaoyaoclaw-memory-distill**（记忆蒸馏）：把对话蒸馏成结构化记忆——语义分级 + 首次建忆 + 增量去重 + 敏感跳过。<https://github.com/dtsola/xiaoyaoclaw-memory-distill>
-- 🗂️ **xiaoyaoclaw-task-progress-tracker**（任务进度跟踪器）：目录即容器，PROGRESS.md 即进度——tasks/ 与 projects/ 生命周期管理。<https://github.com/dtsola/xiaoyaoclaw-task-progress-tracker>
-- 📚 **xiaoyaoclaw-kb-retriever**（知识库检索器）：本地知识库检索——分层索引 + 渐进式检索（md/pdf/xlsx），零依赖零 API key。<https://github.com/dtsola/xiaoyaoclaw-kb-retriever>
-- 🩹 **xiaoyaoclaw-workspace-auditor**（工作区体检）：只读审计 5 类健康度 + 分级报告 + 修复建议，零依赖脚本永不改文件。<https://github.com/dtsola/xiaoyaoclaw-workspace-auditor>
-- 📎 **xiaoyaoclaw-web-clipper**（网页剪藏）：任意网页 → 带 frontmatter 的本地 Markdown，双引擎正文提取降级链，输出直通知识库。<https://github.com/dtsola/xiaoyaoclaw-web-clipper>
-- 🤝 **xiaoyaoclaw-agent-orchestrator**（Agent 协作编排）：拆任务、分 agent、管进度、聚结果、失败重试。<https://github.com/dtsola/xiaoyaoclaw-agent-orchestrator>
-- 📊 **xiaoyaoclaw-usage-report**（用量报告）：解析 session JSONL，回答「任务耗时 / 工具技能 / token 消耗」——零依赖纯本地。<https://github.com/dtsola/xiaoyaoclaw-usage-report>
-- 🎛️ **xiaoyaoclaw-commander**（OpenClaw Cross-Tool Commander）：让任意支持 Agent Skills 的工具指挥小遥Claw / OpenClaw 多 agent 系统。<https://github.com/dtsola/xiaoyaoclaw-commander>
-- 🔍 **xiaoyaoclaw-seo-skill**（SEO Skill）：网站搜索可见性分析与优化——audit/page/content/schema/geo 五流程 + 零依赖审计脚本。<https://github.com/dtsola/xiaoyaoclaw-seo-skill>

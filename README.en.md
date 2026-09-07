@@ -145,16 +145,3 @@ Xiaoyao product user group — feedback · tips · feature requests:
 </p>
 
 <p align="center">Scan to join, or add WeChat <code>dtsola</code> (note: <b>加群</b>)</p>
-
-## Sister projects
-
-- 🏠 **xiaoyaoclaw-workspace-initializer**: standard workspace + WORKSPACE.md rules + multi-agent config safety.<https://github.com/dtsola/xiaoyaoclaw-workspace-initializer>
-- 🧠 **xiaoyaoclaw-memory-distill**: distill conversations into structured memory (semantic levels + first-run build + dedup + sensitive skip).<https://github.com/dtsola/xiaoyaoclaw-memory-distill>
-- 🗂️ **xiaoyaoclaw-task-progress-tracker**: directory-as-container, PROGRESS.md-as-status for tasks/ and projects/.<https://github.com/dtsola/xiaoyaoclaw-task-progress-tracker>
-- 📚 **xiaoyaoclaw-kb-retriever**: local knowledge-base retrieval (layered index + progressive search, md/pdf/xlsx, zero-dep).<https://github.com/dtsola/xiaoyaoclaw-kb-retriever>
-- 🩹 **xiaoyaoclaw-workspace-auditor**: read-only workspace health audit with graded reports.<https://github.com/dtsola/xiaoyaoclaw-workspace-auditor>
-- 📎 **xiaoyaoclaw-web-clipper**: any web page → clean local Markdown with frontmatter, dual-engine extraction.<https://github.com/dtsola/xiaoyaoclaw-web-clipper>
-- 🤝 **xiaoyaoclaw-agent-orchestrator**: split, dispatch, track, aggregate, retry across agents.<https://github.com/dtsola/xiaoyaoclaw-agent-orchestrator>
-- 📊 **xiaoyaoclaw-usage-report**: parse session JSONL — task duration / tools / models / token usage, local-only.<https://github.com/dtsola/xiaoyaoclaw-usage-report>
-- 🎛️ **xiaoyaoclaw-commander** (OpenClaw Cross-Tool Commander): drive OpenClaw from any Agent Skills tool.<https://github.com/dtsola/xiaoyaoclaw-commander>
-- 🔍 **xiaoyaoclaw-seo-skill**: SEO analysis & optimization — audit/page/content/schema/geo + zero-dep audit script.<https://github.com/dtsola/xiaoyaoclaw-seo-skill>
