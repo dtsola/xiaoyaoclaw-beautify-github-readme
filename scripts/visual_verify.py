@@ -219,7 +219,15 @@ def svg_contrast_issues(path: Path) -> list[str]:
 # ---------------------------------------------------------------- rendering
 
 def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
-    """Serve the svg's directory and screenshot the file. Returns (ok: bool, err: str)."""
+    """Serve the svg's directory and screenshot the file. Returns (ok: bool, err: str).
+
+    Trust boundary: the SVG under test is treated as untrusted input (it may come
+    from a third-party repository). Rendering is therefore network-isolated:
+    Chrome is started with DNS resolution disabled for every host except
+    127.0.0.1, so an SVG cannot load remote fonts/images or reach internal
+    networks while it is rendered. Only the local directory of the SVG itself is
+    served, over a loopback-only ephemeral port.
+    """
     svg = svg.resolve()
     parent = svg.parent
     class QuietHandler(SimpleHTTPRequestHandler):
@@ -241,6 +249,10 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
         cmd = [
             chrome, "--headless", "--disable-gpu", "--hide-scrollbars",
             "--no-first-run", "--no-default-browser-check",
+            # Network isolation: block all DNS lookups except loopback, so the
+            # SVG under test cannot pull remote fonts/images or probe internal
+            # hosts. The local preview server (127.0.0.1) stays reachable.
+            '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
             "--user-data-dir=" + str(tempfile.mkdtemp(prefix="chrome-vverify-")),
             f"--window-size={w},{h}",
             f"--screenshot={out_png}",
