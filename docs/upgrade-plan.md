@@ -5,7 +5,7 @@
 ## 改进点与交付状态
 
 ### ① 验证自动化（✅ v1 完成）
-**交付**：`skills/xiaoyaoclaw-beautify-github-readme/scripts/visual_verify.py`
+**交付**：`scripts/visual_verify.py`（仓库根布局：SKILL.md + agents/ + references/ + scripts/）
 - Chrome/Edge 跨平台自动探测（Win/macOS/Linux），headless 渲染每个本地 SVG 到 `--out`
 - WCAG 对比度检查：text fill vs 容器 rect 背景（父组内先声明的大面积 rect → 祖先链 → 全局最大 rect 兜底），900px 渲染缩放下大字 3:1 / 正文 4.5:1
 - 边缘贴边检测：4px 边缘带非背景像素占比（透明/白色画布外像素忽略，圆角过渡宽容）
