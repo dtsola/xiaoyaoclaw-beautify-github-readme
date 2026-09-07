@@ -1,164 +1,164 @@
-<p align="right">
-  <a href="./README.en.md">English</a> · <strong>简体中文</strong>
-</p>
+# OpenClaw Beautify Github Readme 🎨
+
+<div align="center">
+  <strong>🇨🇳 中文</strong> | <a href="README.en.md">🌐 English</a>
+</div>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="OpenClaw Beautify Github Readme：把仓库主页变成项目的门面——先让人看懂，再谈视觉。">
+  <img src="./assets/readme/hero.svg" width="100%" alt="OpenClaw Beautify Github Readme：把仓库主页变成项目的门面——先让人看懂，再谈视觉。纯 SVG / 混合构图 / GitHub-safe GIF">
 </p>
 
-> **基于上游升级（upstream-based）**：本项目由 [beautify-github-readme](https://github.com/oil-oil/beautify-github-readme)（MIT）升级而来——完整保留上游工作流与设计规范，并补强三块：**验证自动化**（渲染级视觉检查）、**Windows / 中文字体适配**、**深浅双主题安全规则**。致谢上游作者。
+> 把 GitHub README 从「信息堆」变成项目的视觉门面——先让人看懂，再谈视觉。
+> Turn a repository homepage into a project-native visual story with GitHub-safe SVG.
+
+> **基于上游升级**：本项目由 [oil-oil/beautify-github-readme](https://github.com/oil-oil/beautify-github-readme)（MIT，1.7k★）本地升级而来，完整保留上游工作流与设计规范，并补强**渲染级验证自动化、Windows / 中文字体适配、深浅双主题安全**。致谢上游作者。
+
+![license](https://img.shields.io/badge/license-MIT-green)
+
+## 为什么需要它
+
+很多仓库的信息其实已经够了，只是没人愿意看。访客一上来看到内部术语、安装命令和目录树，却还不知道这个项目是做什么的。想改，又踩这些坑：
+
+- ❌ **顺序混乱**：功能藏在第 5 屏，价值要靠猜——README 是门面，却劝退访客
+- ❌ **模板感**：套同一个 hero 模板换皮，配色字体跟项目毫无关系，换掉名字哪都能用
+- ❌ **GitHub 限制**：不能像网页那样用 CSS/动画/远程字体；SVG 不吃 `prefers-color-scheme`，深浅主题下可能直接看不清
+- ❌ **预览靠猜**：SVG 文字不换行、溢出、对比度不足——**不渲染出来根本看不见**，纯静态检查抓不到
+- ❌ **中文失配**：字体栈没有微软雅黑，Windows 渲染回退宋体，中英混排字宽全乱
+
+这个技能把 README 当**内容 + 视觉两层**来做：Markdown 管内容（可搜索、可复制、可维护），SVG 管视觉（可编辑、可缩放、GitHub-safe），并内置渲染级验证，杜绝「图看起来挺好、一上 GitHub 就翻车」。
+
+## 特性
+
+- 🏠 **双模式**：整份 README 优化（重排信息 + 建立视觉系统）/ asset-only（只做 hero、章节标题、流程图、徽章等素材，README 一字不动）
+- 🎨 **项目原生**：先读懂仓库，再定配色/字体/图形语言——每个项目一套视觉，不是一份模板打天下
+- 🧩 **三种实现**：纯 SVG（确定性、可编辑）/ Hybrid SVG 构图（SVG 排版 + AI 生图抠图素材）/ GitHub-safe GIF（动效须明确选择，SVG 保留为源文件）
+- 🛡️ **渲染级验证自动化**（升级点）：`scripts/visual_verify.py` 用 Chrome/Edge 无头渲染每张 SVG → WCAG 文字对比度检查 → 边缘贴边检测 → 输出 PNG 供复核，跨平台一条命令
+- 🌏 **Windows / 中文字体适配**（升级点）：字体栈内置微软雅黑（Windows 不再回退宋体），中英混排字宽指导（CJK ≈1em / 拉丁 ≈0.5em）
+- 🌗 **深浅双主题安全规则**（升级点）：SVG 无法自适应主题 → 不透明容器 or 透明底双端对比度硬规则，杜绝「深色图在浅色页看不清」
+- 🔍 **只读审计**：不动文件，先告诉你 README 哪里难懂、哪里缺证据
+- 🤝 **归因可选**：满意后可选加「README MADE WITH」项目原生签名，纯自愿不捆绑
+
+## 它能做出什么
+
+同一套方法，在不同项目上长出完全不同的视觉——终端工具用命令节奏与光标，图标系统用网格与切片，研究项目用坐标与证据标签：
 
 <p align="center">
-  <img src="./assets/readme/theme-wall.svg" width="100%" alt="六种不同仓库主题的 GitHub README 视觉方向：开发工具、AI 产品、设计资源、数据研究、创作者项目和开源库。">
+  <img src="./assets/readme/theme-wall.svg" width="100%" alt="六种仓库主题的 README 视觉方向：开发工具、AI 产品、设计资源、数据研究、创作者项目、开源库（示例沿用上游案例库，MIT）">
 </p>
 
-<p align="center">
-  <img src="./assets/readme/section-used-by.svg" width="100%" alt="这些 README 已经在使用 xiaoyaoclaw-beautify-github-readme。">
-</p>
+## 与上游 beautify-github-readme 的区别
 
-这不是一组假想模板（案例来自上游 beautify-github-readme 的真实使用仓库）。下面八个仓库的 README 已经用这套方法重新整理过，每个项目保留自己的视觉语言和内容结构：
+| 能力 | 上游 | 本版（OpenClaw Beautify Github Readme） |
+|---|---|---|
+| 双模式工作流 / references 设计规范（8 篇） | ✅ | ✅ 完整保留 |
+| 静态审计 `audit_readme.py` | ✅ | ✅ 保留 |
+| **渲染级视觉验证**（Chrome 无头渲染 + WCAG + 贴边） | ❌ 靠肉眼 | ✅ `visual_verify.py` |
+| **Windows 字体适配**（微软雅黑 / 回退风险） | ❌ 仅 PingFang SC | ✅ 内置 |
+| **双主题安全硬规则**（容器 or 双端对比度） | ⚠️ 仅提示检查 | ✅ 规范成文 |
+| 中文支持 | ⚠️ 仅 README 翻译 | ✅ 中文为主 + 中英双语 README |
+| 素材/案例 | 上游 branding 素材 | ✅ 全部重制，无上游 logo 残留 |
 
-- **[oil-ppt](https://github.com/oil-oil/oil-ppt)** · 把程序化 PPT 的方法、效果和使用路径放在同一套视觉系统里。
-- **[draw-ui](https://github.com/oil-oil/draw-ui)** · 用真实 UI 设计稿解释从需求、参考图到 HTML/CSS 还原的过程。
-- **[oil-icon](https://github.com/oil-oil/oil-icon)** · 用两套真实图标作品解释风格锁定、整套生成、切图与透明背景交付。
-- **[Selector](https://github.com/oil-oil/selector)** · 把网页选取、结构化上下文和实际输出直接放进首屏与示例。
-- **[codex-dev-team](https://github.com/oil-oil/codex-dev-team)** · 用角色化团队图说明 Codex 主线程如何把代码探索、边界明确的实现和独立复审分给四个自定义 Agent。
-- **[torqueDASH-Next](https://github.com/moesix/torque-dash-next)** · 用项目原生 SVG 标题和真实仪表盘截图，展示一个自托管车辆遥测仪表盘。
-- **[summertown](https://github.com/SummerPapaya/summertown)** · 用海滨地图主视觉和地标展示，介绍一个可交互的小镇地图。
-- **[Wolfcha](https://github.com/oil-oil/wolfcha)** · 用 SVG 排版与 AI 生成人物抠图，把“一个人也能玩狼人杀”做成电影感、项目原生的首屏。
+## 安装
 
-如果这个 Skill 帮你做出了一份愿意公开分享的 README，欢迎通过 PR 申请加入这个列表。完全自愿：是否使用页尾脚标签名不影响申请，展示内容仍会经过维护者审核。
-
-下面是四个独立的标题示例。它们不共用同一种风格，只根据项目本身决定字体、颜色和右侧放什么。
-
-<p align="center">
-  <img src="./assets/readme/case-kubernetes.svg" width="100%" alt="Kubernetes README 标题示例：纯黑背景、无衬线大标题和集群关系图。">
-</p>
-
-<p align="center">
-  <img src="./assets/readme/case-postgresql.svg" width="100%" alt="PostgreSQL README 标题示例：深蓝背景、衬线标题和数据库表结构。">
-</p>
-
-<p align="center">
-  <img src="./assets/readme/case-block-world.png" width="100%" alt="方块世界混合式 README 首图：像素风 SVG 构图结合 AI 生成的建造者人物抠图。">
-</p>
-
-**方块世界** 展示了一种更轻松的混合式方向：SVG 构建像素字体、网格、标签与场景结构，ImageGen 和固定抠图则负责难以稳定手绘的人物主体。
-
-<p align="center">
-  <a href="https://github.com/oil-oil/wolfcha">
-    <img src="./assets/readme/case-wolfcha.png" width="100%" alt="Wolfcha 混合式 README 首图：SVG 精确排版和圆桌关系图，结合 AI 生成的狼人格主持人。">
-  </a>
-</p>
-
-**[Wolfcha](https://github.com/oil-oil/wolfcha)** 是一个真实的混合式案例：ImageGen 生成项目专属的狼人格主持人，固定绿幕流程完成抠图，SVG 则精确控制文字、月夜圆桌、席位关系和整体构图。
-
-<p align="center">
-  <img src="./assets/readme/section-why.svg" width="100%" alt="01 先让人看懂，再往下读">
-</p>
-
-很多仓库的信息其实已经够了，只是没有排好顺序。访客一上来看到内部术语、安装命令和目录结构，却还不知道这个项目是做什么的。
-
-`xiaoyaoclaw-beautify-github-readme` 会先把项目看懂，再决定什么应该放在前面、什么可以往后放。我们先把项目说清楚，再去做视觉。
-
-<p align="center">
-  <img src="./assets/readme/before-after.svg" width="100%" alt="README 从不知道先看什么，变成按照用途、示例、原理和使用方法排列。">
-</p>
-
-在整份 README 模式里，它会同时处理三件事：
-
-| 内容 | 视觉 | 工程 |
-| --- | --- | --- |
-| 删除重复表述，效果前置，把术语换成更好懂的话 | 从项目本身找到配色、字体和图形语言，再设计 SVG 首屏与展示图 | 保持 GitHub 兼容、图片可访问、命令可复制、正文可搜索 |
-
-不同项目不会得到同一张模板。终端工具可以使用命令节奏与光标，图标系统可以使用网格与切片，研究项目可以使用坐标、图表和证据标签。
-
-<p align="center">
-  <img src="./assets/readme/section-method.svg" width="100%" alt="02 视觉用 SVG，内容留在 Markdown">
-</p>
-
-GitHub README 不能像网站一样自由使用 CSS。这个 Skill 把视觉层做成响应式 SVG，把真正需要阅读、复制和维护的内容留在 Markdown：
-
-- SVG 负责可编辑的首屏、章节、比较、流程和品牌感。
-- 混合式 SVG 构图把确定性的 SVG 排版，与可选的 AI 生图和抠图素材结合，适合人物、有机质感、复杂材质和电影感光影。
-- GIF 负责经过确认的动效，同时保留静态 SVG 作为可编辑源文件和降级版本。
-- 动效必须由用户主动选择，不会默认生成。
-- PNG/WebP 负责截图、生成图片和复杂作品墙。
-- Markdown 负责解释、命令、链接、配置和贡献说明。
-
-这样做，页面可以有完整的设计，也不会变成一张不能搜索、不能维护的长图。
-
-具体怎么从项目内容设计标题、怎么写这些 SVG，已经整理成两份可以直接照着执行的规范：
-
-- [怎么从项目内容设计标题](./references/project-native-hero.md)
-- [README SVG 的写法](./references/svg-production.md)
-- [SVG 与 AI 生图的混合式构图](./references/hybrid-svg-production.md)
-- [README 动效的制作方法](./references/motion-production.md)
-
-<p align="center">
-  <img src="./assets/readme/workflow.svg" width="100%" alt="理解项目、确定主题、重组内容、制作视觉、预览确认五步工作流。">
-</p>
-
-整个过程只守三件事：使用真实内容、不编造产品能力、没有确认就不推送。
-
-<p align="center">
-  <img src="./assets/readme/section-use.svg" width="100%" alt="03 把仓库链接发给 Agent">
-</p>
-
-**方式一 · 执行命令**
+本仓库即技能包（Agent Skills 标准结构，SKILL.md 在根目录）：
 
 ```bash
-npx skills add dtsola/xiaoyaoclaw-beautify-github-readme
+git clone https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme
 ```
 
-**方式二 · 直接交给 Agent**
-
-把下面这句话发给 Agent：
-
-```text
-请安装这个 Skill：https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme
+**用法 A：OpenClaw / Claude Code / Codex 等（技能目录）**
+```bash
+# OpenClaw   → 复制到 skills 目录（或 ClawHub 安装）
+# Claude Code → ~/.claude/skills/xiaoyaoclaw-beautify-github-readme/
+# Codex       → ~/.codex/skills/
+# 其他工具    → 对应 Agent Skills 目录
 ```
 
-安装之后，有两种明确的使用方式：
-
-| 模式 | 会做什么 | 默认不会做什么 |
-| --- | --- | --- |
-| 整份 README 优化 | 重组阅读顺序、精简文案、整理真实证据，并建立完整视觉系统 | 未经确认不会提交、推送或发布 |
-| 只生成视觉素材 | 生成静态 SVG 首图、章节标题、流程图、徽章，或保留 SVG 源文件的 GitHub-safe GIF | 不改 README 正文、顺序、图片引用或链接 |
-
-如果请求已经说明范围，Skill 会直接执行。只说“美化这个仓库”或只提供仓库地址时，Agent 会先问：
-
-```text
-这次希望我优化整份 README，还是只生成视觉素材？
-如果只做素材，请告诉我是首图、章节标题、流程图、徽章、动效，还是一组视觉模块。
+**用法 B：临时给某个仓库用**
+```bash
+# 把 SKILL.md + references/ + scripts/ 放进仓库的 .agents/skills/ 即可
 ```
 
-**整份 README 优化**
+## 快速上手（三步）
 
-```text
-[$xiaoyaoclaw-beautify-github-readme] 帮我重新设计这个仓库的 GitHub 主页，
-风格根据项目主题决定。先给我本地预览，不要推送。
+### Step 1：告诉 AI 你的目标
+
+对你的 Agent 说：
+
+> 用 beautify 技能重新设计这个仓库的 GitHub 主页，风格根据项目主题决定。先给我本地预览，不要推送。
+
+技能会先确认范围（整份 README 还是只做素材），再读仓库提取项目故事。
+
+### Step 2：本地验证
+
+README 模式改完后，跑双脚本验证：
+
+```bash
+python3 scripts/audit_readme.py README.md          # 静态：引用 / XML / alt
+python3 scripts/visual_verify.py README.md --out /tmp/previews   # 渲染级：对比度 / 贴边
 ```
 
-**只生成视觉素材**
+`visual_verify.py` 自动找 Chrome/Edge 渲染每张 SVG 并输出 PNG 预览——交给 AI 视觉复核，或直接肉眼检查 900px / 360px 两种宽度。
 
-```text
-[$xiaoyaoclaw-beautify-github-readme] 保留 README 不动，生成一张动态 GIF 首图，并保留 SVG 源文件。
-根据项目现有风格设计，先给我渲染预览。
+### Step 3：满意后再发布
+
+未经你确认，技能不会 commit / push / 发 PR。确认预览后让它落地即可。
+
+## 目录结构
+
+```
+xiaoyaoclaw-beautify-github-readme/
+├── SKILL.md                    # 技能本体（双模式流程 + 门控 + 质量红线）
+├── README.md / README.en.md    # 本文件（中英双语）
+├── references/                 # 按需加载的设计规范
+│   ├── visual-direction.md     # 主题化视觉系统定义
+│   ├── project-native-hero.md  # 从项目内容设计 hero
+│   ├── svg-production.md       # GitHub-safe SVG 写法（含双主题安全）
+│   ├── hybrid-svg-production.md# SVG + AI 生图混合构图
+│   ├── motion-production.md    # GitHub-safe GIF 制作
+│   ├── github-readme-canvas.md # 画布与排版规范
+│   ├── content-architecture.md # 文案顺序与删减规则
+│   └── showcase-contribution.md# 案例收录与归因
+├── scripts/
+│   ├── visual_verify.py        # 渲染级验证（Chrome 无头 + WCAG + 贴边）★升级
+│   ├── audit_readme.py         # 静态审计
+│   └── render_motion_gif.py    # SVG → GitHub-safe GIF
+├── assets/readme/              # README 展示资产（中英双语）
+└── LICENSE
 ```
 
-只生成视觉素材的模式下，即使 Agent 为了理解项目读取了 README，也不代表可以修改它。需要把新素材嵌入 README 时，会再次取得明确授权。
+## License
 
-也可以只做只读审查：
-
-```text
-[$xiaoyaoclaw-beautify-github-readme] 只审查这个 README，告诉我哪里难懂，不要修改文件。
-```
-
-整份 README 模式默认交付本地预览、视觉素材和 README diff；只生成视觉素材的模式默认交付源文件、渲染预览、可选 GIF 和嵌入代码。只有在明确授权后，才会修改引用、提交、推送或创建 PR。
-
-MIT License
+MIT — 基于 [beautify-github-readme](https://github.com/oil-oil/beautify-github-readme)（MIT）升级，致谢上游作者。
 
 ---
 
-这份 README 也是一个实际示例。我们在同一页里用了深色首屏、多主题展示、前后对比、流程图和三种章节容器，同时把需要复制和阅读的内容留在 Markdown 里。
+## 🛠️ 需要定制？
+
+**Agent & Skills 定制，价格 ¥800 起。**
+
+- 微信：`dtsola`（添加好友时备注：**openclaw定制**）
+- 服务范围：README 视觉改造 / OpenClaw 多 agent 部署 / 自定义 Skill 开发 / agent 记忆系统搭建
+
+## 💬 加入交流群
+
+小遥全系产品用户交流群——产品反馈 · 使用交流 · 功能建议：
+
+<p align="center">
+  <img src="./assets/readme/community-qr.png" width="280" alt="小遥AI 用户交流群二维码：扫码加群，或添加微信 dtsola（备注：加群）">
+</p>
+
+<p align="center">扫码加群，或添加微信 <code>dtsola</code>（备注：<b>加群</b>）</p>
+
+## 姊妹项目
+
+- 🏠 **xiaoyaoclaw-workspace-initializer**（工作区初始化器）：给每个 agent 一个「家」——标准目录结构 + WORKSPACE.md 规范 + 多 agent 配置安全。<https://github.com/dtsola/xiaoyaoclaw-workspace-initializer>
+- 🧠 **xiaoyaoclaw-memory-distill**（记忆蒸馏）：把对话蒸馏成结构化记忆——语义分级 + 首次建忆 + 增量去重 + 敏感跳过。<https://github.com/dtsola/xiaoyaoclaw-memory-distill>
+- 🗂️ **xiaoyaoclaw-task-progress-tracker**（任务进度跟踪器）：目录即容器，PROGRESS.md 即进度——tasks/ 与 projects/ 生命周期管理。<https://github.com/dtsola/xiaoyaoclaw-task-progress-tracker>
+- 📚 **xiaoyaoclaw-kb-retriever**（知识库检索器）：本地知识库检索——分层索引 + 渐进式检索（md/pdf/xlsx），零依赖零 API key。<https://github.com/dtsola/xiaoyaoclaw-kb-retriever>
+- 🩹 **xiaoyaoclaw-workspace-auditor**（工作区体检）：只读审计 5 类健康度 + 分级报告 + 修复建议，零依赖脚本永不改文件。<https://github.com/dtsola/xiaoyaoclaw-workspace-auditor>
+- 📎 **xiaoyaoclaw-web-clipper**（网页剪藏）：任意网页 → 带 frontmatter 的本地 Markdown，双引擎正文提取降级链，输出直通知识库。<https://github.com/dtsola/xiaoyaoclaw-web-clipper>
+- 🤝 **xiaoyaoclaw-agent-orchestrator**（Agent 协作编排）：拆任务、分 agent、管进度、聚结果、失败重试。<https://github.com/dtsola/xiaoyaoclaw-agent-orchestrator>
+- 📊 **xiaoyaoclaw-usage-report**（用量报告）：解析 session JSONL，回答「任务耗时 / 工具技能 / token 消耗」——零依赖纯本地。<https://github.com/dtsola/xiaoyaoclaw-usage-report>
+- 🎛️ **xiaoyaoclaw-commander**（OpenClaw Cross-Tool Commander）：让任意支持 Agent Skills 的工具指挥小遥Claw / OpenClaw 多 agent 系统。<https://github.com/dtsola/xiaoyaoclaw-commander>
+- 🔍 **xiaoyaoclaw-seo-skill**（SEO Skill）：网站搜索可见性分析与优化——audit/page/content/schema/geo 五流程 + 零依赖审计脚本。<https://github.com/dtsola/xiaoyaoclaw-seo-skill>

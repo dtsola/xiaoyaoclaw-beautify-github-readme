@@ -1,162 +1,160 @@
-<p align="right">
-  <strong>English</strong> · <a href="./README.md">简体中文</a>
-</p>
+# OpenClaw Beautify Github Readme 🎨
+
+<div align="center">
+  <a href="README.md">🇨🇳 中文</a> | <strong>🌐 English</strong>
+</div>
 
 <p align="center">
-  <img src="./assets/readme/en/hero.svg" width="100%" alt="OpenClaw Beautify Github Readme: turn a repository homepage into a project-native visual story.">
+  <img src="./assets/readme/en/hero.svg" width="100%" alt="OpenClaw Beautify Github Readme: turn a repository homepage into a project-native visual story — make the project clear before asking people to keep reading. Pure SVG / hybrid composition / GitHub-safe GIF">
 </p>
 
-> **Based on the upstream [beautify-github-readme](https://github.com/oil-oil/beautify-github-readme) (MIT)**: this project keeps the full upstream workflow and design guidance, and adds three improvements — automated visual verification, Windows / CJK font adaptation, and dark/light theme safety rules. Credit to the upstream maintainers.
+> Turn a repository homepage into a project-native visual story with GitHub-safe SVG.
+> 把 GitHub README 从「信息堆」变成项目的视觉门面——先让人看懂，再谈视觉。
+
+> **Based on the upstream [oil-oil/beautify-github-readme](https://github.com/oil-oil/beautify-github-readme) (MIT, 1.7k★)**: this project keeps the full upstream workflow and design guidance, and adds render-level visual verification, Windows / CJK font adaptation, and dark/light theme safety rules. Credit to the upstream maintainers.
+
+![license](https://img.shields.io/badge/license-MIT-green)
+
+## Why it exists
+
+Most repositories already contain enough information — visitors just never get to it. They land on internal jargon, install commands, and a directory tree before learning what the project is actually for. Trying to fix that yourself usually hits these walls:
+
+- ❌ **Wrong order**: the value is buried on the fifth screen, and the homepage keeps losing visitors
+- ❌ **Template feel**: the same hero skin pasted onto every repo — swap the name and it could belong to anyone
+- ❌ **GitHub constraints**: no CSS, no web fonts, no animation inside SVG; SVG ignores `prefers-color-scheme`, so assets can become unreadable on the reader's theme
+- ❌ **Guessing instead of rendering**: SVG text does not wrap, overflows silently, and fails contrast — **you cannot see problems until you render**, and static checks miss them
+- ❌ **CJK mismatch**: font stacks without Microsoft YaHei fall back to SimSun on Windows, breaking width and layout for Chinese text
+
+This Skill treats a README as two layers: **Markdown owns the content** (searchable, copyable, maintainable) and **SVG owns the visuals** (editable, scalable, GitHub-safe) — with built-in render-level verification so "looks fine locally, breaks on GitHub" stops happening.
+
+## Features
+
+- 🏠 **Two explicit modes**: whole-README redesign (reorder the story + build a visual system) / asset-only (hero, section headers, workflow, badges — README untouched, byte for byte)
+- 🎨 **Project-native**: read the repository first, then derive palette, type, and motifs from *it* — never the same template twice
+- 🧩 **Three implementations**: pure SVG (deterministic, hand-editable) / hybrid SVG composition (SVG layout + AI-generated cutout subject) / GitHub-safe GIF (motion is opt-in; the SVG stays as the editable source)
+- 🛡️ **Render-level verification** (upgrade): `scripts/visual_verify.py` renders every SVG with headless Chrome/Edge → WCAG text-contrast checks → edge-clipping scan → PNG previews. Cross-platform, one command
+- 🌏 **Windows / CJK adaptation** (upgrade): Microsoft YaHei in the font stack (no more SimSun fallback on Windows); CJK ≈1em / Latin ≈0.5em width guidance
+- 🌗 **Theme-safety rules** (upgrade): SVG cannot adapt to the reader's theme → opaque container or dual-endpoint contrast rules, written down as hard requirements
+- 🔍 **Read-only audit**: understand what is unclear or unevidenced before touching anything
+- 🤝 **Optional attribution**: a project-native "README MADE WITH" signature only after you approve, never bundled or required
+
+## What it can produce
+
+The same method grows different visuals on different projects — CLIs use command rhythm and cursors, icon systems use keylines and cutouts, research repos use coordinates and evidence labels:
 
 <p align="center">
-  <img src="./assets/readme/en/theme-wall.svg" width="100%" alt="Six project-native README directions for developer tools, AI products, design resources, research, creator projects, and open-source libraries.">
+  <img src="./assets/readme/en/theme-wall.svg" width="100%" alt="Six project-native README directions: developer tools, AI products, design resources, data research, creator projects, open-source libraries (examples from the upstream case library, MIT)">
 </p>
 
-<p align="center">
-  <img src="./assets/readme/en/section-used-by.svg" width="100%" alt="Real repositories already using xiaoyaoclaw-beautify-github-readme.">
-</p>
+## Differences from upstream beautify-github-readme
 
-These are not hypothetical templates (real-world cases collected by the upstream beautify-github-readme). The method is already used by eight public repositories, each with its own visual language and content structure:
+| Capability | Upstream | This version |
+|---|---|---|
+| Two-mode workflow / 8 design references | ✅ | ✅ fully kept |
+| Static audit `audit_readme.py` | ✅ | ✅ kept |
+| **Render-level verification** (Chrome headless + WCAG + edge scan) | ❌ eyeball only | ✅ `visual_verify.py` |
+| **Windows font adaptation** (YaHei / fallback risk) | ❌ PingFang SC only | ✅ built-in |
+| **Theme-safety hard rules** (container or dual-endpoint contrast) | ⚠️ hint only | ✅ codified |
+| Chinese support | ⚠️ README translation only | ✅ Chinese-first + bilingual README |
+| Assets / showcase | upstream-branded | ✅ fully re-made, no upstream logo remnants |
 
-- **[oil-ppt](https://github.com/oil-oil/oil-ppt)** — presents the method, results, and first-use path for programmatic slide creation in one visual system.
-- **[draw-ui](https://github.com/oil-oil/draw-ui)** — uses real UI outputs to explain the path from a brief and reference images to HTML/CSS reconstruction.
-- **[oil-icon](https://github.com/oil-oil/oil-icon)** — uses real icon sets to explain style locking, batch generation, slicing, and transparent delivery.
-- **[Selector](https://github.com/oil-oil/selector)** — puts page selection, structured context, and real output directly into the opening screen and examples.
-- **[codex-dev-team](https://github.com/oil-oil/codex-dev-team)** — uses a character-driven team map to explain how one main Codex thread delegates exploration, bounded implementation, and independent review to four custom agents.
-- **[torqueDASH-Next](https://github.com/moesix/torque-dash-next)** — uses a project-native SVG hero with OBD-II PID data and a real dashboard screenshot to explain a self-hosted vehicle telemetry dashboard.
-- **[summertown](https://github.com/SummerPapaya/summertown)** — uses a seaside-map hero and landmark showcase to introduce an interactive town map.
-- **[Wolfcha](https://github.com/oil-oil/wolfcha)** — combines SVG typography and an AI-generated character cutout to turn “play Werewolf solo” into a cinematic, project-native opening screen.
+## Install
 
-If this Skill helped you create a public README you are proud of, you are welcome to propose it for this list in a PR. This is completely optional: the footer signature is appreciated but never required, and showcase submissions remain subject to maintainer review.
-
-Below are four independent hero directions. They do not share one house style; each derives its typography, color, composition, and proof from the project itself.
-
-<p align="center">
-  <img src="./assets/readme/en/case-kubernetes.svg" width="100%" alt="Kubernetes README hero example with a black system layout and cluster relationship diagram.">
-</p>
-
-<p align="center">
-  <img src="./assets/readme/en/case-postgresql.svg" width="100%" alt="PostgreSQL README hero example with a deep blue editorial layout and relational tables.">
-</p>
-
-<p align="center">
-  <img src="./assets/readme/en/case-block-world.png" width="100%" alt="Block World hybrid README hero combining pixel-style SVG composition with an AI-generated builder character cutout.">
-</p>
-
-**Block World** shows a playful hybrid direction: SVG builds the pixel typography, grid, labels, and scene structure, while ImageGen and chroma-key removal supply the character that would be cumbersome to draw deterministically.
-
-<p align="center">
-  <a href="https://github.com/oil-oil/wolfcha">
-    <img src="./assets/readme/en/case-wolfcha.png" width="100%" alt="Wolfcha hybrid README hero combining precise SVG typography and table graphics with an AI-generated wolf game master.">
-  </a>
-</p>
-
-**[Wolfcha](https://github.com/oil-oil/wolfcha)** is a real hybrid case: ImageGen created the project-specific wolf game master, a fixed chroma-key workflow removed the background, and SVG kept the typography, moonlit table, seat map, and composition precise.
-
-<p align="center">
-  <img src="./assets/readme/en/section-why.svg" width="100%" alt="01 Make the project clear before asking people to keep reading.">
-</p>
-
-Most repositories already contain enough information. The problem is usually the order: visitors see internal terminology, installation commands, and directory trees before they understand what the project is for.
-
-`xiaoyaoclaw-beautify-github-readme` reads the real repository first, identifies the clearest value and proof, and only then decides how the page should look.
-
-<p align="center">
-  <img src="./assets/readme/en/before-after.svg" width="100%" alt="A README changing from dense information with no clear entry point to a value, proof, method, and first-use sequence.">
-</p>
-
-In whole-README mode, it works across three layers:
-
-| Content | Visual system | Engineering |
-| --- | --- | --- |
-| Remove repetition, move proof forward, and replace internal jargon with concrete outcomes | Derive color, typography, composition, and project-native motifs before designing the hero and supporting modules | Keep assets GitHub-safe, images accessible, commands copyable, and body text searchable |
-
-Different projects should not receive the same template. A CLI can use command rhythm and cursors; an icon system can use keylines and cutouts; a research repository can use coordinates, charts, and evidence labels.
-
-<p align="center">
-  <img src="./assets/readme/en/section-method.svg" width="100%" alt="02 Put visual identity in SVG and readable content in Markdown.">
-</p>
-
-GitHub READMEs do not have the layout freedom of a website. This Skill separates the visual and content layers:
-
-- SVG handles editable heroes, section transitions, comparisons, diagrams, and identity.
-- Hybrid SVG composition combines deterministic SVG layout with optional AI-generated, background-removed subjects for characters, organic texture, complex materials, and cinematic lighting.
-- GIF handles approved motion while the static SVG remains the editable fallback.
-- Motion is opt-in and is never generated by default.
-- PNG/WebP handles screenshots, generated artwork, and complex showcase walls.
-- Markdown handles explanations, commands, links, configuration, and contribution details.
-
-The result can feel designed without becoming one long image that nobody can search, copy, or maintain.
-
-The reusable production guidance lives here:
-
-- [Designing a project-native hero](./references/project-native-hero.md)
-- [Writing GitHub-safe README SVGs](./references/svg-production.md)
-- [Composing SVG with generated raster material](./references/hybrid-svg-production.md)
-- [Producing GitHub-safe README motion](./references/motion-production.md)
-
-<p align="center">
-  <img src="./assets/readme/en/workflow.svg" width="100%" alt="Understand the project, set the direction, structure the content, build the visuals, and review the preview.">
-</p>
-
-The process keeps three promises: use real project material, never invent capabilities, and never publish without explicit approval.
-
-<p align="center">
-  <img src="./assets/readme/en/section-use.svg" width="100%" alt="03 Send the repository to your Agent.">
-</p>
-
-**Option 1 · Install from the command line**
+This repository *is* the skill package (Agent Skills layout, SKILL.md at the root):
 
 ```bash
-npx skills add dtsola/xiaoyaoclaw-beautify-github-readme
+git clone https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme
 ```
 
-**Option 2 · Ask your Agent to install it**
-
-```text
-Install this Skill: https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme
+**Option A — into your AI tool's skills directory**
+```bash
+# OpenClaw      → copy into your skills dir (or install via ClawHub)
+# Claude Code   → ~/.claude/skills/xiaoyaoclaw-beautify-github-readme/
+# Codex         → ~/.codex/skills/
+# Other tools   → the matching Agent Skills directory
 ```
 
-The Skill has two explicit modes:
-
-| Mode | What it changes | What it leaves alone by default |
-| --- | --- | --- |
-| Whole README | Reading order, copy hierarchy, proof, Markdown, and the complete visual system | It will not commit, push, or publish without approval |
-| Asset-only | A static SVG hero, section headers, workflow, badge, diagram, or an optional GitHub-safe GIF with SVG source | It will not edit README copy, order, image references, or links |
-
-If the request already states the scope, the Skill starts directly. If a user only says “beautify this repository” or provides a repository URL, the Agent asks:
-
-```text
-Would you like me to improve the whole README or only create visual assets?
-If asset-only, do you need a hero, section headers, workflow, badge, motion graphic, or a coordinated set?
+**Option B — per-repository**
+```bash
+# Drop SKILL.md + references/ + scripts/ into the repo's .agents/skills/
 ```
 
-**Whole-README mode**
+## Quick start (3 steps)
 
-```text
-Use $xiaoyaoclaw-beautify-github-readme to redesign this repository homepage around its real project theme.
-Show me a local preview first and do not push anything.
+### Step 1 — Tell your Agent the goal
+
+> Use the beautify skill to redesign this repository homepage around its real project theme. Show me a local preview first and do not push anything.
+
+The Skill confirms scope first (whole README vs asset-only), then reads the repository and extracts the project story.
+
+### Step 2 — Verify locally
+
+```bash
+python3 scripts/audit_readme.py README.md          # static: refs / XML / alt
+python3 scripts/visual_verify.py README.md --out /tmp/previews   # render-level: contrast / edges
 ```
 
-**Asset-only mode**
+`visual_verify.py` auto-detects Chrome/Edge, renders every SVG, and drops PNG previews — inspect them at ~900px content width and 360px mobile (or ask a vision model).
 
-```text
-Use $xiaoyaoclaw-beautify-github-readme to keep the README unchanged and create one animated GIF hero with its SVG source.
-Derive the style from the existing project and show me the rendered preview first.
+### Step 3 — Publish only after you approve
+
+The Skill never commits, pushes, or opens PRs without explicit authorization.
+
+## Layout
+
+```
+xiaoyaoclaw-beautify-github-readme/
+├── SKILL.md                    # Skill body (two-mode workflow + gates + quality bar)
+├── README.md / README.en.md    # This file (bilingual)
+├── references/                 # Design guidance, loaded on demand
+│   ├── visual-direction.md     # Theme-specific visual system
+│   ├── project-native-hero.md  # Designing the hero from project content
+│   ├── svg-production.md       # GitHub-safe SVG (incl. theme safety)
+│   ├── hybrid-svg-production.md# SVG + generated raster composition
+│   ├── motion-production.md    # GitHub-safe GIF production
+│   ├── github-readme-canvas.md # Canvas & typography scale
+│   ├── content-architecture.md # Copy sequencing & deletion rules
+│   └── showcase-contribution.md# Showcase & attribution
+├── scripts/
+│   ├── visual_verify.py        # Render-level verification ★upgrade
+│   ├── audit_readme.py         # Static audit
+│   └── render_motion_gif.py    # SVG → GitHub-safe GIF
+├── assets/readme/              # README showcase assets (bilingual)
+└── LICENSE
 ```
 
-Reading a README for context does not grant permission to edit it. In asset-only mode, embedding the new assets requires a separate, explicit approval.
+## License
 
-You can also request a read-only audit:
-
-```text
-Use $xiaoyaoclaw-beautify-github-readme to audit this README for clarity, hierarchy, trust, and maintenance cost. Do not edit files.
-```
-
-Whole-README mode delivers a local preview, visual assets, and a README diff. Asset-only mode delivers source assets, rendered previews, optional GIF derivatives, and embed snippets. Commits, pushes, PRs, and publishing always require explicit authorization.
-
-MIT License
+MIT — upgraded from [beautify-github-readme](https://github.com/oil-oil/beautify-github-readme) (MIT). Credit to the upstream maintainers.
 
 ---
 
-This README is also a working example: it combines a project-native hero, a theme wall, real adoption proof, section transitions, and readable Markdown instead of rasterizing the whole page.
+## 🛠️ Custom work?
+
+**Agent & Skills customization from ¥800.**
+
+- WeChat: `dtsola` (note: **openclaw定制**)
+- Scope: README visual redesign / OpenClaw multi-agent setup / custom Skill development / agent memory systems
+
+## 💬 Community
+
+Xiaoyao product user group — feedback · tips · feature requests:
+
+<p align="center">
+  <img src="./assets/readme/community-qr.png" width="280" alt="Xiaoyao AI user community QR code">
+</p>
+
+<p align="center">Scan to join, or add WeChat <code>dtsola</code> (note: <b>加群</b>)</p>
+
+## Sister projects
+
+- 🏠 **xiaoyaoclaw-workspace-initializer**: standard workspace + WORKSPACE.md rules + multi-agent config safety.<https://github.com/dtsola/xiaoyaoclaw-workspace-initializer>
+- 🧠 **xiaoyaoclaw-memory-distill**: distill conversations into structured memory (semantic levels + first-run build + dedup + sensitive skip).<https://github.com/dtsola/xiaoyaoclaw-memory-distill>
+- 🗂️ **xiaoyaoclaw-task-progress-tracker**: directory-as-container, PROGRESS.md-as-status for tasks/ and projects/.<https://github.com/dtsola/xiaoyaoclaw-task-progress-tracker>
+- 📚 **xiaoyaoclaw-kb-retriever**: local knowledge-base retrieval (layered index + progressive search, md/pdf/xlsx, zero-dep).<https://github.com/dtsola/xiaoyaoclaw-kb-retriever>
+- 🩹 **xiaoyaoclaw-workspace-auditor**: read-only workspace health audit with graded reports.<https://github.com/dtsola/xiaoyaoclaw-workspace-auditor>
+- 📎 **xiaoyaoclaw-web-clipper**: any web page → clean local Markdown with frontmatter, dual-engine extraction.<https://github.com/dtsola/xiaoyaoclaw-web-clipper>
+- 🤝 **xiaoyaoclaw-agent-orchestrator**: split, dispatch, track, aggregate, retry across agents.<https://github.com/dtsola/xiaoyaoclaw-agent-orchestrator>
+- 📊 **xiaoyaoclaw-usage-report**: parse session JSONL — task duration / tools / models / token usage, local-only.<https://github.com/dtsola/xiaoyaoclaw-usage-report>
+- 🎛️ **xiaoyaoclaw-commander** (OpenClaw Cross-Tool Commander): drive OpenClaw from any Agent Skills tool.<https://github.com/dtsola/xiaoyaoclaw-commander>
+- 🔍 **xiaoyaoclaw-seo-skill**: SEO analysis & optimization — audit/page/content/schema/geo + zero-dep audit script.<https://github.com/dtsola/xiaoyaoclaw-seo-skill>
