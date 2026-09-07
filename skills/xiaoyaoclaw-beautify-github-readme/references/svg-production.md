@@ -80,7 +80,7 @@ If the composition already reads clearly after step 4, stop.
 ## Handle typography deliberately
 
 - Use system font stacks; do not load remote fonts.
-- Use `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `PingFang SC`, and `sans-serif` for general UI text.
+- Use `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `PingFang SC`, `Microsoft YaHei`, and `sans-serif` for general UI text. Keep both `PingFang SC` (macOS) and `Microsoft YaHei` (Windows) in the stack: GitHub visitors are mostly on Windows, and without YaHei their CJK text falls back to SimSun, which changes width and breaks your layout assumptions.
 - Use `ui-monospace`, `SFMono-Regular`, `Menlo`, and `monospace` for code and metadata.
 - Use `Georgia`, `Songti SC`, and `serif` only when an editorial or established tone fits.
 - Use size and weight for hierarchy before adding color or decoration.
@@ -92,7 +92,7 @@ SVG text does not wrap automatically. Split lines explicitly:
 <text x="0" y="128">Second line</text>
 ```
 
-Render after every meaningful copy change. Chinese, English, serif, and sans-serif occupy different widths; do not trust character count alone.
+Do not trust character counts for width. CJK glyphs are full-width (≈1em), Latin lowercase averages ≈0.5em, and the same string renders 5–10% wider or narrower between Windows and macOS font stacks. After every meaningful copy change, render the file and check for overflow — `scripts/visual_verify.py` renders every asset with headless Chrome and produces PNGs for exactly this inspection.
 
 ## Draw project material, not tech decoration
 
@@ -128,6 +128,15 @@ For generated diagram output:
 - Use gradients only when they describe material or depth; do not use them as automatic polish.
 - Avoid heavy filters and shadows. For overlapping screenshots, use a low-opacity offset shape or export the composition as a raster image.
 - Do not add rounded cards, top borders, or patterns to every module.
+
+## Stay legible on both GitHub themes
+
+GitHub does not evaluate `prefers-color-scheme` inside README SVGs, so an SVG cannot adapt to the reader's theme. Decide once, up front:
+
+- **Opaque container (recommended):** give the asset a full-bleed background rect and put text on it. The asset then looks identical on light and dark pages. Verify text contrast against that rect — `scripts/visual_verify.py` checks this automatically (WCAG 4.5:1 body, 3:1 large text, at the 900px GitHub render scale).
+- **Transparent background:** the asset sits directly on the reader's page color (`#ffffff` light, `#0d1117` dark). Every text fill must hold ≥4.5:1 against *both* extremes; mid-grey `#808080` text fails both and must not be used on transparent assets. When in doubt, add the container.
+
+Eyebrow labels, captions, and metadata are still text: if they must be readable, they need the same contrast. If a label is genuinely decorative, say so in the alt text rather than shipping an unreadable line.
 
 ## Decide between SVG and raster
 
@@ -178,19 +187,14 @@ Recommended embed:
 
 ## Validate and inspect
 
-Run the bundled audit:
+Run the bundled audits:
 
 ```bash
-python3 scripts/audit_readme.py /path/to/repository/README.md
+python3 scripts/audit_readme.py /path/to/repository/README.md   # static: refs, XML, alt text
+python3 scripts/visual_verify.py /path/to/repository/README.md --out /tmp/previews  # renders + contrast + edges
 ```
 
-Then render every SVG and inspect it visually. On macOS, a quick local render is:
-
-```bash
-sips -s format png assets/readme/hero.svg --out /tmp/hero.png
-```
-
-Otherwise use a browser, `rsvg-convert`, or another SVG renderer. Check:
+The verifier auto-detects Chrome/Edge (Windows, macOS, Linux), renders every local SVG at its declared size into `--out`, checks text contrast against the container background, and flags content touching the canvas edge. It never replaces the human check — inspect every PNG at GitHub content width (~900px) and at 360px mobile. On macOS `sips -s format png` works for one-off renders; on any platform a browser or `rsvg-convert` is fine, but the verifier is the default because it is scripted and cross-platform. During that inspection check:
 
 - clipped text and paths;
 - text that becomes too small at GitHub width;

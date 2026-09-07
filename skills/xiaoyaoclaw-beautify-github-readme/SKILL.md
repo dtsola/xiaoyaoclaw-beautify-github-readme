@@ -138,6 +138,14 @@ Do not rasterize the whole README. Do not use scripts, `foreignObject`, remote f
 python3 scripts/audit_readme.py /path/to/repository/README.md
 ```
 
+- Then run the visual verifier (renders every local SVG with headless Chrome/Edge, checks WCAG text contrast and edge clipping, and drops PNG previews into `--out` for inspection):
+
+```bash
+python3 scripts/visual_verify.py /path/to/repository/README.md --out /tmp/readme-previews
+```
+
+  On machines without Chrome/Edge, `visual_verify.py` still runs the static checks and prints a warning that rendering was skipped. `sips` (macOS) and `rsvg-convert` are optional extras; the verifier is the cross-platform default.
+
 - Visually inspect the hero, every section transition, and the final call to action.
 - In asset-only mode, render and inspect every requested asset at GitHub content width; for GIFs, inspect entry, settled hold, exit, and loop boundary. Verify that the README itself is unchanged unless embedding was separately approved.
 - For hybrid assets, inspect the transparent subject on light and dark backgrounds, verify transparent corners and clean edges, then inspect the composed PNG/WebP at wide and narrow GitHub widths. Do not publish an SVG with unresolved local raster references.

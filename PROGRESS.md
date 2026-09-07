@@ -2,12 +2,12 @@
 type: project
 slug: xiaoyaoclaw-beautify-github-readme
 status: active
-progress: 5
+progress: 60
 created: 2026-09-07
 updated: 2026-09-07
 docs:
   - path: docs/upgrade-plan.md
-    desc: 升级改进点清单（上游评估 + 优化项 + 验收标准）
+    desc: 升级改进点清单（交付状态 + 验收标准）
 ---
 
 # xiaoyaoclaw-beautify-github-readme（README 美化技能 · OpenClaw 升级版）
@@ -40,9 +40,11 @@ docs:
 ## 进度日志
 
 - 2026-09-07 09:2x：指挥官拍板立项（非 fork，本地 clone 上游改进，README 声明基于上游版）；clone 上游完成（55bdb1c，历史完整，工作区干净）；PROGRESS.md 落位
+- 2026-09-07 09:3x：rebrand commit b3f8427（改名/中英双语/上游声明/新 hero/清旧 branding）；指挥官确认 hero 方向 OK
+- 2026-09-07 09:4x：改进 ①②③ 开发完成——visual_verify.py（渲染+对比度+贴边，自测全量通过，抓到上游素材真实问题）；svg-production.md 补 YaHei/中英混排/双主题安全；SKILL.md §8 接入新脚本；docs/upgrade-plan.md 落位。待指挥官确认后 GitHub 建仓发布
 
 ## 文档索引
 
 | 文档 | 说明 |
 |------|------|
-| （待建）docs/upgrade-plan.md | 改进点明细 + 验收标准 |
+| docs/upgrade-plan.md | 改进点明细 + 交付状态 + 验收标准 |
