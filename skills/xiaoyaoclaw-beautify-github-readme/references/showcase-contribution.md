@@ -1,6 +1,6 @@
 # Optional showcase contribution
 
-Use this workflow only after the user explicitly approves the finished README and opts into sharing a public repository with the `beautify-github-readme` showcase.
+Use this workflow only after the user explicitly approves the finished README and opts into sharing a public repository with the `xiaoyaoclaw-beautify-github-readme` showcase.
 
 ## Eligibility gate
 
@@ -17,13 +17,13 @@ Do not treat an attribution badge as a requirement. A repository may be proposed
 
 Use neutral wording and make declining easy:
 
-> If you'd like to share this result, I can draft a small PR to add the public repository to the real-world showcase in `oil-oil/beautify-github-readme`. This is completely optional, and the upstream maintainers will decide whether to merge it.
+> If you'd like to share this result, I can draft a small PR to add the public repository to the real-world showcase in `dtsola/xiaoyaoclaw-beautify-github-readme`. This is completely optional, and the upstream maintainers will decide whether to merge it.
 
 Do not repeat the offer after a decline. Do not create an issue, discussion, fork, branch, or PR merely because the user expressed satisfaction.
 
 ## Prepare the proposal
 
-1. Inspect the latest default branch of `https://github.com/oil-oil/beautify-github-readme`.
+1. Inspect the latest default branch of `https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme`.
 2. Locate the current showcase list and check for duplicates.
 3. Draft one factual sentence explaining what the finished README demonstrates. Do not invent adoption, testimonials, results, or product capabilities.
 4. Keep the English and Simplified Chinese showcase lists aligned. Show both proposed entries to the user for approval.

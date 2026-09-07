@@ -1,164 +1,164 @@
 <p align="right">
-  <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a> · <a href="./README.ja.md">日本語</a>
+  <a href="./README.en.md">English</a> · <strong>简体中文</strong>
 </p>
 
 <p align="center">
-  <img src="./assets/readme/en/hero.gif" width="100%" alt="Beautify GitHub README: help visitors understand a repository at first glance.">
+  <img src="./assets/readme/hero.svg" width="100%" alt="OpenClaw Beautify Github Readme：把仓库主页变成项目的门面——先让人看懂，再谈视觉。">
+</p>
+
+> **基于上游升级（upstream-based）**：本项目由 [beautify-github-readme](https://github.com/oil-oil/beautify-github-readme)（MIT）升级而来——完整保留上游工作流与设计规范，并补强三块：**验证自动化**（渲染级视觉检查）、**Windows / 中文字体适配**、**深浅双主题安全规则**。致谢上游作者。
+
+<p align="center">
+  <img src="./assets/readme/theme-wall.svg" width="100%" alt="六种不同仓库主题的 GitHub README 视觉方向：开发工具、AI 产品、设计资源、数据研究、创作者项目和开源库。">
 </p>
 
 <p align="center">
-  <img src="./assets/readme/en/theme-wall.svg" width="100%" alt="Six project-native README directions for developer tools, AI products, design resources, research, creator projects, and open-source libraries.">
+  <img src="./assets/readme/section-used-by.svg" width="100%" alt="这些 README 已经在使用 xiaoyaoclaw-beautify-github-readme。">
+</p>
+
+这不是一组假想模板（案例来自上游 beautify-github-readme 的真实使用仓库）。下面八个仓库的 README 已经用这套方法重新整理过，每个项目保留自己的视觉语言和内容结构：
+
+- **[oil-ppt](https://github.com/oil-oil/oil-ppt)** · 把程序化 PPT 的方法、效果和使用路径放在同一套视觉系统里。
+- **[draw-ui](https://github.com/oil-oil/draw-ui)** · 用真实 UI 设计稿解释从需求、参考图到 HTML/CSS 还原的过程。
+- **[oil-icon](https://github.com/oil-oil/oil-icon)** · 用两套真实图标作品解释风格锁定、整套生成、切图与透明背景交付。
+- **[Selector](https://github.com/oil-oil/selector)** · 把网页选取、结构化上下文和实际输出直接放进首屏与示例。
+- **[codex-dev-team](https://github.com/oil-oil/codex-dev-team)** · 用角色化团队图说明 Codex 主线程如何把代码探索、边界明确的实现和独立复审分给四个自定义 Agent。
+- **[torqueDASH-Next](https://github.com/moesix/torque-dash-next)** · 用项目原生 SVG 标题和真实仪表盘截图，展示一个自托管车辆遥测仪表盘。
+- **[summertown](https://github.com/SummerPapaya/summertown)** · 用海滨地图主视觉和地标展示，介绍一个可交互的小镇地图。
+- **[Wolfcha](https://github.com/oil-oil/wolfcha)** · 用 SVG 排版与 AI 生成人物抠图，把“一个人也能玩狼人杀”做成电影感、项目原生的首屏。
+
+如果这个 Skill 帮你做出了一份愿意公开分享的 README，欢迎通过 PR 申请加入这个列表。完全自愿：是否使用页尾脚标签名不影响申请，展示内容仍会经过维护者审核。
+
+下面是四个独立的标题示例。它们不共用同一种风格，只根据项目本身决定字体、颜色和右侧放什么。
+
+<p align="center">
+  <img src="./assets/readme/case-kubernetes.svg" width="100%" alt="Kubernetes README 标题示例：纯黑背景、无衬线大标题和集群关系图。">
 </p>
 
 <p align="center">
-  <img src="./assets/readme/en/section-used-by.svg" width="100%" alt="Real repositories already using beautify-github-readme.">
-</p>
-
-These are not hypothetical templates. The method is already used by eight public repositories, each with its own visual language and content structure:
-
-- **[oil-ppt](https://github.com/oil-oil/oil-ppt)** — presents the method, results, and first-use path for programmatic slide creation in one visual system.
-- **[draw-ui](https://github.com/oil-oil/draw-ui)** — uses real UI outputs to explain the path from a brief and reference images to HTML/CSS reconstruction.
-- **[oil-icon](https://github.com/oil-oil/oil-icon)** — uses real icon sets to explain style locking, batch generation, slicing, and transparent delivery.
-- **[Selector](https://github.com/oil-oil/selector)** — puts page selection, structured context, and real output directly into the opening screen and examples.
-- **[codex-dev-team](https://github.com/oil-oil/codex-dev-team)** — uses a character-driven team map to explain how one main Codex thread delegates exploration, bounded implementation, and independent review to four custom agents.
-- **[torqueDASH-Next](https://github.com/moesix/torque-dash-next)** — uses a project-native SVG hero with OBD-II PID data and a real dashboard screenshot to explain a self-hosted vehicle telemetry dashboard.
-- **[summertown](https://github.com/SummerPapaya/summertown)** — uses a seaside-map hero and landmark showcase to introduce an interactive town map.
-- **[Wolfcha](https://github.com/oil-oil/wolfcha)** — combines SVG typography and an AI-generated character cutout to turn “play Werewolf solo” into a cinematic, project-native opening screen.
-
-If this Skill helped you create a public README you are proud of, you are welcome to propose it for this list in a PR. This is completely optional: the footer signature is appreciated but never required, and showcase submissions remain subject to maintainer review.
-
-Below are four independent hero directions. They do not share one house style; each derives its typography, color, composition, and proof from the project itself.
-
-<p align="center">
-  <img src="./assets/readme/en/case-kubernetes.svg" width="100%" alt="Kubernetes README hero example with a black system layout and cluster relationship diagram.">
+  <img src="./assets/readme/case-postgresql.svg" width="100%" alt="PostgreSQL README 标题示例：深蓝背景、衬线标题和数据库表结构。">
 </p>
 
 <p align="center">
-  <img src="./assets/readme/en/case-postgresql.svg" width="100%" alt="PostgreSQL README hero example with a deep blue editorial layout and relational tables.">
+  <img src="./assets/readme/case-block-world.png" width="100%" alt="方块世界混合式 README 首图：像素风 SVG 构图结合 AI 生成的建造者人物抠图。">
 </p>
 
-<p align="center">
-  <img src="./assets/readme/en/case-block-world.png" width="100%" alt="Block World hybrid README hero combining pixel-style SVG composition with an AI-generated builder character cutout.">
-</p>
-
-**Block World** shows a playful hybrid direction: SVG builds the pixel typography, grid, labels, and scene structure, while ImageGen and chroma-key removal supply the character that would be cumbersome to draw deterministically.
+**方块世界** 展示了一种更轻松的混合式方向：SVG 构建像素字体、网格、标签与场景结构，ImageGen 和固定抠图则负责难以稳定手绘的人物主体。
 
 <p align="center">
   <a href="https://github.com/oil-oil/wolfcha">
-    <img src="./assets/readme/en/case-wolfcha.png" width="100%" alt="Wolfcha hybrid README hero combining precise SVG typography and table graphics with an AI-generated wolf game master.">
+    <img src="./assets/readme/case-wolfcha.png" width="100%" alt="Wolfcha 混合式 README 首图：SVG 精确排版和圆桌关系图，结合 AI 生成的狼人格主持人。">
   </a>
 </p>
 
-**[Wolfcha](https://github.com/oil-oil/wolfcha)** is a real hybrid case: ImageGen created the project-specific wolf game master, a fixed chroma-key workflow removed the background, and SVG kept the typography, moonlit table, seat map, and composition precise.
+**[Wolfcha](https://github.com/oil-oil/wolfcha)** 是一个真实的混合式案例：ImageGen 生成项目专属的狼人格主持人，固定绿幕流程完成抠图，SVG 则精确控制文字、月夜圆桌、席位关系和整体构图。
 
 <p align="center">
-  <img src="./assets/readme/en/section-why.svg" width="100%" alt="01 Make the project clear before asking people to keep reading.">
+  <img src="./assets/readme/section-why.svg" width="100%" alt="01 先让人看懂，再往下读">
 </p>
 
-Most repositories already contain enough information. The problem is usually the order: visitors see internal terminology, installation commands, and directory trees before they understand what the project is for.
+很多仓库的信息其实已经够了，只是没有排好顺序。访客一上来看到内部术语、安装命令和目录结构，却还不知道这个项目是做什么的。
 
-`beautify-github-readme` reads the real repository first, identifies the clearest value and proof, and only then decides how the page should look.
+`xiaoyaoclaw-beautify-github-readme` 会先把项目看懂，再决定什么应该放在前面、什么可以往后放。我们先把项目说清楚，再去做视觉。
 
 <p align="center">
-  <img src="./assets/readme/en/before-after.svg" width="100%" alt="A README changing from dense information with no clear entry point to a value, proof, method, and first-use sequence.">
+  <img src="./assets/readme/before-after.svg" width="100%" alt="README 从不知道先看什么，变成按照用途、示例、原理和使用方法排列。">
 </p>
 
-In whole-README mode, it works across three layers:
+在整份 README 模式里，它会同时处理三件事：
 
-| Content | Visual system | Engineering |
+| 内容 | 视觉 | 工程 |
 | --- | --- | --- |
-| Remove repetition, move proof forward, and replace internal jargon with concrete outcomes | Derive color, typography, composition, and project-native motifs before designing the hero and supporting modules | Keep assets GitHub-safe, images accessible, commands copyable, and body text searchable |
+| 删除重复表述，效果前置，把术语换成更好懂的话 | 从项目本身找到配色、字体和图形语言，再设计 SVG 首屏与展示图 | 保持 GitHub 兼容、图片可访问、命令可复制、正文可搜索 |
 
-Different projects should not receive the same template. A CLI can use command rhythm and cursors; an icon system can use keylines and cutouts; a research repository can use coordinates, charts, and evidence labels.
-
-<p align="center">
-  <img src="./assets/readme/en/section-method.svg" width="100%" alt="02 Put visual identity in SVG and readable content in Markdown.">
-</p>
-
-GitHub READMEs do not have the layout freedom of a website. This Skill separates the visual and content layers:
-
-- SVG handles editable heroes, section transitions, comparisons, diagrams, and identity.
-- Hybrid SVG composition combines deterministic SVG layout with optional AI-generated, background-removed subjects for characters, organic texture, complex materials, and cinematic lighting.
-- GIF handles approved motion while the static SVG remains the editable fallback.
-- Motion is opt-in and is never generated by default.
-- PNG/WebP handles screenshots, generated artwork, and complex showcase walls.
-- Markdown handles explanations, commands, links, configuration, and contribution details.
-
-The result can feel designed without becoming one long image that nobody can search, copy, or maintain.
-
-The reusable production guidance lives here:
-
-- [Designing a project-native hero](./skills/beautify-github-readme/references/project-native-hero.md)
-- [Writing GitHub-safe README SVGs](./skills/beautify-github-readme/references/svg-production.md)
-- [Composing SVG with generated raster material](./skills/beautify-github-readme/references/hybrid-svg-production.md)
-- [Producing GitHub-safe README motion](./skills/beautify-github-readme/references/motion-production.md)
+不同项目不会得到同一张模板。终端工具可以使用命令节奏与光标，图标系统可以使用网格与切片，研究项目可以使用坐标、图表和证据标签。
 
 <p align="center">
-  <img src="./assets/readme/en/workflow.svg" width="100%" alt="Understand the project, set the direction, structure the content, build the visuals, and review the preview.">
+  <img src="./assets/readme/section-method.svg" width="100%" alt="02 视觉用 SVG，内容留在 Markdown">
 </p>
 
-The process keeps three promises: use real project material, never invent capabilities, and never publish without explicit approval.
+GitHub README 不能像网站一样自由使用 CSS。这个 Skill 把视觉层做成响应式 SVG，把真正需要阅读、复制和维护的内容留在 Markdown：
+
+- SVG 负责可编辑的首屏、章节、比较、流程和品牌感。
+- 混合式 SVG 构图把确定性的 SVG 排版，与可选的 AI 生图和抠图素材结合，适合人物、有机质感、复杂材质和电影感光影。
+- GIF 负责经过确认的动效，同时保留静态 SVG 作为可编辑源文件和降级版本。
+- 动效必须由用户主动选择，不会默认生成。
+- PNG/WebP 负责截图、生成图片和复杂作品墙。
+- Markdown 负责解释、命令、链接、配置和贡献说明。
+
+这样做，页面可以有完整的设计，也不会变成一张不能搜索、不能维护的长图。
+
+具体怎么从项目内容设计标题、怎么写这些 SVG，已经整理成两份可以直接照着执行的规范：
+
+- [怎么从项目内容设计标题](./skills/xiaoyaoclaw-beautify-github-readme/references/project-native-hero.md)
+- [README SVG 的写法](./skills/xiaoyaoclaw-beautify-github-readme/references/svg-production.md)
+- [SVG 与 AI 生图的混合式构图](./skills/xiaoyaoclaw-beautify-github-readme/references/hybrid-svg-production.md)
+- [README 动效的制作方法](./skills/xiaoyaoclaw-beautify-github-readme/references/motion-production.md)
 
 <p align="center">
-  <img src="./assets/readme/en/section-use.svg" width="100%" alt="03 Send the repository to your Agent.">
+  <img src="./assets/readme/workflow.svg" width="100%" alt="理解项目、确定主题、重组内容、制作视觉、预览确认五步工作流。">
 </p>
 
-**Option 1 · Install from the command line**
+整个过程只守三件事：使用真实内容、不编造产品能力、没有确认就不推送。
+
+<p align="center">
+  <img src="./assets/readme/section-use.svg" width="100%" alt="03 把仓库链接发给 Agent">
+</p>
+
+**方式一 · 执行命令**
 
 ```bash
-npx skills add oil-oil/beautify-github-readme
+npx skills add dtsola/xiaoyaoclaw-beautify-github-readme
 ```
 
-**Option 2 · Ask your Agent to install it**
+**方式二 · 直接交给 Agent**
+
+把下面这句话发给 Agent：
 
 ```text
-Install this Skill: https://github.com/oil-oil/beautify-github-readme
+请安装这个 Skill：https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme
 ```
 
-The Skill has two explicit modes:
+安装之后，有两种明确的使用方式：
 
-| Mode | What it changes | What it leaves alone by default |
+| 模式 | 会做什么 | 默认不会做什么 |
 | --- | --- | --- |
-| Whole README | Reading order, copy hierarchy, proof, Markdown, and the complete visual system | It will not commit, push, or publish without approval |
-| Asset-only | A static SVG hero, section headers, workflow, badge, diagram, or an optional GitHub-safe GIF with SVG source | It will not edit README copy, order, image references, or links |
+| 整份 README 优化 | 重组阅读顺序、精简文案、整理真实证据，并建立完整视觉系统 | 未经确认不会提交、推送或发布 |
+| 只生成视觉素材 | 生成静态 SVG 首图、章节标题、流程图、徽章，或保留 SVG 源文件的 GitHub-safe GIF | 不改 README 正文、顺序、图片引用或链接 |
 
-If the request already states the scope, the Skill starts directly. If a user only says “beautify this repository” or provides a repository URL, the Agent asks:
-
-```text
-Would you like me to improve the whole README or only create visual assets?
-If asset-only, do you need a hero, section headers, workflow, badge, motion graphic, or a coordinated set?
-```
-
-**Whole-README mode**
+如果请求已经说明范围，Skill 会直接执行。只说“美化这个仓库”或只提供仓库地址时，Agent 会先问：
 
 ```text
-Use $beautify-github-readme to redesign this repository homepage around its real project theme.
-Show me a local preview first and do not push anything.
+这次希望我优化整份 README，还是只生成视觉素材？
+如果只做素材，请告诉我是首图、章节标题、流程图、徽章、动效，还是一组视觉模块。
 ```
 
-**Asset-only mode**
+**整份 README 优化**
 
 ```text
-Use $beautify-github-readme to keep the README unchanged and create one animated GIF hero with its SVG source.
-Derive the style from the existing project and show me the rendered preview first.
+[$xiaoyaoclaw-beautify-github-readme] 帮我重新设计这个仓库的 GitHub 主页，
+风格根据项目主题决定。先给我本地预览，不要推送。
 ```
 
-Reading a README for context does not grant permission to edit it. In asset-only mode, embedding the new assets requires a separate, explicit approval.
-
-You can also request a read-only audit:
+**只生成视觉素材**
 
 ```text
-Use $beautify-github-readme to audit this README for clarity, hierarchy, trust, and maintenance cost. Do not edit files.
+[$xiaoyaoclaw-beautify-github-readme] 保留 README 不动，生成一张动态 GIF 首图，并保留 SVG 源文件。
+根据项目现有风格设计，先给我渲染预览。
 ```
 
-Whole-README mode delivers a local preview, visual assets, and a README diff. Asset-only mode delivers source assets, rendered previews, optional GIF derivatives, and embed snippets. Commits, pushes, PRs, and publishing always require explicit authorization.
+只生成视觉素材的模式下，即使 Agent 为了理解项目读取了 README，也不代表可以修改它。需要把新素材嵌入 README 时，会再次取得明确授权。
 
-<p align="center">
-  <a href="https://x.com/I_am_oil_oil"><img src="./assets/readme/follow-on-x.svg" width="420" alt="Follow the maker on X at @I_am_oil_oil"></a>
-</p>
+也可以只做只读审查：
+
+```text
+[$xiaoyaoclaw-beautify-github-readme] 只审查这个 README，告诉我哪里难懂，不要修改文件。
+```
+
+整份 README 模式默认交付本地预览、视觉素材和 README diff；只生成视觉素材的模式默认交付源文件、渲染预览、可选 GIF 和嵌入代码。只有在明确授权后，才会修改引用、提交、推送或创建 PR。
 
 MIT License
 
 ---
 
-This README is also a working example: it combines a project-native hero, a theme wall, real adoption proof, section transitions, and readable Markdown instead of rasterizing the whole page.
+这份 README 也是一个实际示例。我们在同一页里用了深色首屏、多主题展示、前后对比、流程图和三种章节容器，同时把需要复制和阅读的内容留在 Markdown 里。

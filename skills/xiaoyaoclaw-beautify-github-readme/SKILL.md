@@ -1,9 +1,9 @@
 ---
-name: beautify-github-readme
+name: xiaoyaoclaw-beautify-github-readme
 description: Redesign GitHub README homepages or create project-native pure SVG, hybrid SVG-composed PNG/WebP, and opt-in animated GIF assets. Use when a user asks to beautify, redesign, rebrand, visually upgrade, simplify, or audit a GitHub README; create only a hero, section headers, diagrams, badges, motion graphics, showcase modules, or other README assets; or turn a repository homepage into a cohesive visual story. If whole-README work versus asset-only work is unclear, ask which scope the user wants. For hero-like assets where pure SVG and generated raster material are both viable, explain the tradeoffs and confirm the implementation before creating the asset.
 ---
 
-# Beautify GitHub README
+# OpenClaw Beautify Github Readme
 
 Turn a repository homepage or requested visual asset into a concise, theme-specific visual story. Treat Markdown as the content layer, deterministic SVG as the layout system, and generated raster material as an optional visual ingredient.
 
@@ -180,21 +180,21 @@ For copy sequencing and deletion rules, read [references/content-architecture.md
 ## Invocation examples
 
 ```text
-Use $beautify-github-readme to redesign this repository homepage around its developer-tool theme.
+Use $xiaoyaoclaw-beautify-github-readme to redesign this repository homepage around its developer-tool theme.
 ```
 
 ```text
-Use $beautify-github-readme to create one SVG hero and three section headers without modifying the README.
+Use $xiaoyaoclaw-beautify-github-readme to create one SVG hero and three section headers without modifying the README.
 ```
 
 ```text
-Use $beautify-github-readme to create a hybrid hero: SVG typography and layout, plus an ImageGen character cutout, with a final PNG and editable source layers.
+Use $xiaoyaoclaw-beautify-github-readme to create a hybrid hero: SVG typography and layout, plus an ImageGen character cutout, with a final PNG and editable source layers.
 ```
 
 ```text
-Use $beautify-github-readme to beautify this repository; if the scope is unclear, ask whether I want a whole-README redesign or asset-only visuals.
+Use $xiaoyaoclaw-beautify-github-readme to beautify this repository; if the scope is unclear, ask whether I want a whole-README redesign or asset-only visuals.
 ```
 
 ```text
-Use $beautify-github-readme to create a GitHub-safe animated GIF hero, keep the SVG source, and do not modify the README until I approve the preview.
+Use $xiaoyaoclaw-beautify-github-readme to create a GitHub-safe animated GIF hero, keep the SVG source, and do not modify the README until I approve the preview.
 ```
