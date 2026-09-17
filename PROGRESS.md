@@ -67,6 +67,12 @@ docs:
   - **相对路径 `--out` 修复**：Chrome `--screenshot` 不吃相对路径（报"系统找不到指定的路径"）→ 统一 `resolve()`
   - **GIF 全流程真跑**（本机用 ImageMagick 顶替缺失的 rsvg-convert，走真实 `build_frames`/`encode_gif`）：7 帧 / 12 FPS / 3.5 KB / 像素正确 ✅ → 证明 OH1 那轮改动没破坏功能
   - 三份提交在本地：`477caac`（安全修复）+ `ae77d38`（证据）+ `f6fcfa6`（入口收拢 & 误报修复）
+- **2026-09-17 10:20 指挥官批「发」→ 已提交 ClawHub v1.0.10**
+  - `clawhub skill publish`（绝对路径；未带 `--categories/--topics`；dry-run 先过）
+  - 回执：`Update submitted for ...@1.0.10; pending security scans before it becomes public`
+  - 即时状态：`tags.latest` 仍 1.0.9；`verify --version 1.0.10` → `Version not found` ⇒ 扫描未落地
+  - 已排一次性复查（cron `b1662c88`，10:50）→ 落地后核对 11 条命中是否清零
+  - ⚠️ GitHub 未推送（代理 22307 未监听 + 直连超时）→ ClawHub 溯源仍 unavailable
 
 ## 文档索引
 
