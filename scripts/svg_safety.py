@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Shared trust boundary for untrusted SVG input.
+"""Shared trust boundary for untrusted SVG input, plus the single funnel for
+every external process this skill starts.
 
 Every script in this skill that renders repository-supplied SVG (visual_verify.py,
 render_motion_gif.py) must run the same checks before handing a file to a
@@ -15,6 +16,14 @@ fail-closed: anything that could make a renderer talk to the network, reach
 outside the isolated render directory, or execute code is refused, and the
 script reports the reason instead of rendering.
 
+External processes
+------------------
+`run_external()` is the only place in this skill that spawns a child process.
+Callers pass a pre-validated argument list (never a shell string), and it
+enforces `shell=False`, a hard timeout, and a bounded error report — so a
+malformed asset cannot hang the run, and there is exactly one code path to
+audit for process launching.
+
 Checks
 ------
 1. XML well-formedness (unparseable input is refused).
@@ -24,14 +33,15 @@ Checks
 4. Every resource-bearing reference (href / xlink:href / src, and CSS `url(...)`)
    must be local: a `#fragment` or a `data:` URI. Remote URLs, protocol-relative
    URLs, root-absolute paths, Windows-drive paths and parent-directory traversal
-   are refused. Plain sibling-relative references are reported but permitted —
-   they resolve to the throwaway preview origin, which serves exactly one file.
+   are refused. Plain sibling-relative references are permitted but unresolvable
+   — they resolve to the throwaway preview origin, which serves exactly one file.
 5. No CSS `@import` (always an out-of-band fetch).
 """
 
 from __future__ import annotations
 
 import re
+import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -168,3 +178,45 @@ def assert_safe_to_render(path: Path) -> None:
             "#fragment references); reauthor the asset without remote or "
             "external references."
         )
+
+
+def run_external(
+    command: list[str],
+    *,
+    timeout: int,
+    label: str,
+    check: bool = True,
+) -> subprocess.CompletedProcess:
+    """Run one external tool. The only process-launching path in this skill.
+
+    The caller supplies an explicit argument list built from locally validated
+    values — never a shell string — and it is passed to subprocess with
+    `shell=False`, so no shell interpretation, globbing, or metacharacter
+    expansion can occur. A hard timeout bounds every run, so malformed or
+    computationally expensive input cannot hang the skill. Errors carry the
+    tool label and a truncated stderr instead of an opaque traceback.
+
+    Raises SystemExit when the tool is missing, times out, or exits non-zero
+    (with check=True).
+    """
+    if not command or not all(isinstance(part, str) for part in command):
+        raise SystemExit(f"ERROR: {label}: invalid argument list")
+
+    try:
+        return subprocess.run(
+            command,
+            check=check,
+            shell=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        raise SystemExit(f"ERROR: {label}: executable not found: {command[0]}") from None
+    except subprocess.TimeoutExpired:
+        raise SystemExit(f"ERROR: {label}: timed out after {timeout}s") from None
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or exc.stdout or "").strip()[:400]
+        raise SystemExit(f"ERROR: {label}: exited {exc.returncode}. {detail}") from None

@@ -26,7 +26,6 @@ import argparse
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import threading
@@ -43,10 +42,10 @@ except ImportError:
 
 # Shared trust boundary for untrusted SVG input; see scripts/svg_safety.py.
 try:
-    from svg_safety import is_safe_to_render, safety_issues
+    from svg_safety import is_safe_to_render, run_external, safety_issues
 except ImportError:  # allow `python3 scripts/visual_verify.py` from any cwd
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from svg_safety import is_safe_to_render, safety_issues
+    from svg_safety import is_safe_to_render, run_external, safety_issues
 
 # ---------------------------------------------------------------- discovery
 
@@ -154,17 +153,22 @@ def contrast_ratio(a: tuple[int, int, int], b: tuple[int, int, int]) -> float:
     return (hi + 0.05) / (lo + 0.05)
 
 
-def svg_contrast_issues(path: Path) -> list[str]:
+def svg_contrast_issues(path: Path) -> tuple[list[str], list[str]]:
     """Check each <text> fill against its container <rect> background.
 
     Background resolution order: the first filled <rect> declared inside the
     text's own parent group, then up the ancestor chain, then the largest
     <rect> in the document (fallback).
+
+    Returns (issues, notices). `issues` are real contrast failures; `notices`
+    are cases the checker cannot decide (e.g. a gradient/pattern background),
+    which are reported without failing the run — a legitimate gradient hero
+    must not be reported as a defect.
     """
     try:
         root = ET.parse(path).getroot()
     except ET.ParseError as exc:
-        return [f"invalid SVG XML: {exc}"]
+        return [f"invalid SVG XML: {exc}"], []
     raw_tag = root.tag
     ns = raw_tag.rsplit("}", 1)[0] + "}" if "}" in raw_tag else ""
     def tag(name: str) -> str:
@@ -177,14 +181,24 @@ def svg_contrast_issues(path: Path) -> list[str]:
             parent_of[child] = node
 
     rects: list[tuple[float, tuple[int, int, int]]] = []
+    painted_rects = 0
     for rect in root.iter(tag("rect")):
         w = float(rect.get("width", "0") or 0)
         h = float(rect.get("height", "0") or 0)
-        fill = parse_color(rect.get("fill", ""))
+        raw_fill = (rect.get("fill", "") or "").strip()
+        fill = parse_color(raw_fill)
         if fill:
             rects.append((w * h, fill))
+        elif raw_fill and raw_fill.lower() != "none":
+            painted_rects += 1  # gradient (url(#id)), pattern, currentColor, ...
     if not rects:
-        return ["no <rect> background found; cannot verify contrast"]
+        if painted_rects:
+            return [], [
+                f"{painted_rects} filled <rect> use a non-solid paint "
+                "(gradient/pattern); text contrast not machine-verifiable - "
+                "inspect the rendered PNG visually"
+            ]
+        return ["no <rect> background found; cannot verify contrast"], []
     dominant = max(rects, key=lambda r: r[0])[1]
 
     def container_bg(text_el: ET.Element) -> tuple[int, int, int] | None:
@@ -241,7 +255,7 @@ def svg_contrast_issues(path: Path) -> list[str]:
                 f"low contrast: fill={text.get('fill')} vs bg #{''.join(f'{c:02X}' for c in bg)} "
                 f"ratio={ratio:.2f} (<{limit:.1f}, {'large' if large else 'body'} text @{rendered:.0f}px): {sample!r}"
             )
-    return issues
+    return issues, []
 
 
 # ---------------------------------------------------------------- rendering
@@ -364,14 +378,13 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
                 f"--screenshot={out_png}",
                 url,
             ]
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
-                                  encoding="utf-8", errors="replace", shell=False)
+            proc = run_external(cmd, timeout=120, label="Chrome render", check=False)
             if not out_png.exists() or out_png.stat().st_size == 0:
                 detail = (proc.stderr or "") + " | STDOUT: " + (proc.stdout or "")
                 return False, f"rc={proc.returncode} " + (detail.strip() or "no screenshot produced")[:400]
             return True, ""
-        except subprocess.TimeoutExpired:
-            return False, "Chrome render timed out"
+        except SystemExit as exc:  # raised by run_external on timeout/missing binary
+            return False, str(exc)
         finally:
             server.shutdown()
             thread.join(timeout=5)
@@ -400,44 +413,63 @@ def svg_size(path: Path) -> tuple[int, int] | None:
     return None
 
 
-def edge_scan_issues(png: Path) -> list[str]:
+def edge_scan_issues(png: Path) -> tuple[list[str], list[str]]:
     """Warn when rendered content is not a uniform full-bleed background.
 
-    Transparent pixels (rounded-corner outside areas) are ignored. The dominant
-    color of each 4px edge band is treated as background; other colors covering
-    more than 2% of the band suggest content touching the edge (clipping risk).
+    Transparent pixels (rounded-corner outside areas) and the white canvas
+    Chrome paints outside the SVG are ignored. Each 4px edge band is compared
+    against its own **median** colour: pixels that deviate strongly from that
+    median are treated as content touching the edge (possible clipping).
+
+    Using a median + deviation threshold (rather than "dominant colour") keeps
+    deliberate full-bleed gradients and subtle background ramps out of the
+    failure path, while a real element touching the edge still trips it.
+
+    Returns (issues, notices); notices mark bands that cannot be judged
+    (photographic/noisy edges) instead of failing the run.
     """
     if not HAS_PIL:
-        return []
+        return [], []
     im = Image.open(png).convert("RGBA")
     w, h = im.size
     px = im.load()
     issues: list[str] = []
+    notices: list[str] = []
+    # max per-channel deviation from the band median that still counts as
+    # "same background"; 48/255 keeps gradients and AA ramps quiet while any
+    # distinctly coloured element crossing the edge stands out.
+    DEVIATION = 48
     edges = {"top": [(x, y) for x in range(w) for y in range(min(4, h))],
              "bottom": [(x, y) for x in range(w) for y in range(max(0, h - 4), h)],
              "left": [(x, y) for x in range(min(4, w)) for y in range(h)],
              "right": [(x, y) for x in range(max(0, w - 4), w) for y in range(h)]}
     for name, cells in edges.items():
-        colors: dict[tuple[int, int, int], int] = {}
-        total = 0
+        band: list[tuple[int, int, int]] = []
         for x, y in cells:
             r, g, b, a = px[x, y]
             if a < 128 or (r, g, b) == (255, 255, 255):
-                # skip transparent/AA fringe (rounded corners) and the white
-                # canvas Chrome paints outside the SVG's own background
                 continue
-            colors[(r, g, b)] = colors.get((r, g, b), 0) + 1
-            total += 1
+            band.append((r, g, b))
+        total = len(band)
         if total == 0:
             continue
-        dominant = max(colors, key=colors.get)
-        others = sum(n for c, n in colors.items() if c != dominant)
-        if others / total > 0.06:
+        ordered = sorted(band, key=lambda c: 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2])
+        median = ordered[total // 2]
+        deviating = sum(
+            1 for c in band if max(abs(c[0] - median[0]), abs(c[1] - median[1]), abs(c[2] - median[2])) > DEVIATION
+        )
+        if deviating / total > 0.06:
             issues.append(
-                f"edge '{name}' has {others / total:.0%} non-background pixels in the 4px band "
-                f"- content may touch/clip the edge; inspect the render"
+                f"edge '{name}' has {deviating / total:.0%} pixels deviating from the band "
+                f"background ({median}) in the 4px band - content may touch/clip the edge; "
+                "inspect the render"
             )
-    return issues
+        elif len(set(band)) > 200:
+            notices.append(
+                f"edge '{name}' is a photographic/noisy edge ({len(set(band))} colours) - "
+                "clipping not machine-verifiable; inspect the render"
+            )
+    return issues, notices
 
 
 # ---------------------------------------------------------------- main
@@ -490,16 +522,20 @@ def main() -> int:
     if not chrome and sources:
         print("WARNING: Chrome/Edge not found - rendering skipped (static checks only)")
 
-    out_dir = Path(args.out) if args.out else Path(tempfile.mkdtemp(prefix="readme-vverify-"))
+    out_dir = Path(args.out).expanduser().resolve() if args.out else Path(
+        tempfile.mkdtemp(prefix="readme-vverify-")
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     failures = 0
     for src, svg in sources:
         print(f"\n== {svg.relative_to(target.parent) if target.suffix.lower() != '.svg' else svg.name}")
         static = audit_svg_static(svg)
-        contrast = svg_contrast_issues(svg)
+        contrast, notices = svg_contrast_issues(svg)
         for issue in static:
             print(f"  [static] {issue}")
+        for notice in notices:
+            print(f"  [notice] {notice}")
         for issue in contrast:
             print(f"  [contrast] {issue}")
         if static or contrast:
@@ -518,7 +554,10 @@ def main() -> int:
                 failures += 1
             else:
                 print(f"  [render] {png.name} ({png.stat().st_size // 1024} KB)")
-                for issue in edge_scan_issues(png):
+                edge_issues, edge_notices = edge_scan_issues(png)
+                for notice in edge_notices:
+                    print(f"  [notice] {notice}")
+                for issue in edge_issues:
                     print(f"  [edge] {issue}")
                     failures += 1
         else:
