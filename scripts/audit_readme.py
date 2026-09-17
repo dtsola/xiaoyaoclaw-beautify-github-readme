@@ -8,11 +8,17 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+# Shared trust boundary for untrusted SVG input; see scripts/svg_safety.py.
+try:
+    from svg_safety import safety_issues
+except ImportError:  # allow running from any cwd
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from svg_safety import safety_issues
+
 
 MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")
 HTML_IMAGE = re.compile(r"<img\b[^>]*\bsrc=[\"']([^\"']+)[\"'][^>]*>", re.I)
 HTML_ALT = re.compile(r"\balt=[\"']([^\"']*)[\"']", re.I)
-UNSAFE_SVG_TAGS = {"script", "foreignObject"}
 
 
 def local_target(src: str, base: Path) -> Path | None:
@@ -50,10 +56,11 @@ def audit_svg(path: Path) -> list[str]:
         tag = node.tag.rsplit("}", 1)[-1]
         if tag == "title":
             title_found = True
-        if tag in UNSAFE_SVG_TAGS:
-            issues.append(f"contains unsupported <{tag}>")
     if not title_found:
         issues.append("missing <title>")
+    # Trust-boundary findings come from the shared gate so the audit and both
+    # render paths report exactly the same problems.
+    issues.extend(safety_issues(path))
     return issues
 
 

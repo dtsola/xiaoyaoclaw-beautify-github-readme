@@ -16,9 +16,18 @@ description: >
   visually upgrade, simplify, or audit a GitHub README, or to create README
   visual assets. Do not activate for general questions, passive reading, or
   discussion of a README that does not request visual or audit work.
+  Capabilities are split across the bundled scripts: scripts/visual_verify.py
+  renders assets with headless Chrome/Edge and checks WCAG contrast and edge
+  clipping, scripts/render_motion_gif.py turns named SVG layers into an
+  animated GIF, scripts/audit_readme.py performs the static README/SVG audit,
+  and scripts/svg_safety.py is the shared trust boundary that vets untrusted
+  SVG input for both render paths.
   中文：面向 OpenClaw 的 GitHub README 视觉美化技能：重新设计仓库主页，或创建项目原生
   视觉素材——纯 SVG hero、章节标题、流程图、徽章、动效 GIF、SVG 混合构图等，内置渲染级
   视觉验证（无头 Chrome/Edge 渲染、WCAG 对比度、边缘贴边检测）与深浅双主题安全。
+  能力由内置脚本分工实现：visual_verify.py 负责渲染级验证，render_motion_gif.py 负责
+  SVG 分层转 GIF，audit_readme.py 负责静态审计，svg_safety.py 是两条渲染路径共用的
+  不可信 SVG 信任边界。
   仅当用户明确要求美化/重新设计/升级/简化/审查 GitHub 仓库主页或制作 README 视觉素材时
   激活；对 README 的一般性提问、被动阅读或讨论不激活本技能。
   触发词：README美化、美化README、GitHub主页设计、仓库主页改版、README hero、
@@ -30,6 +39,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+  - Env
 metadata:
   openclaw:
     requires:
@@ -46,7 +56,8 @@ metadata:
 # OpenClaw Beautify Github Readme
 
 > 📖 **完整文档（安装 / 快速上手三步 / 使用指南）：<https://github.com/dtsola/xiaoyaoclaw-beautify-github-readme>**
-> 用户或智能体需要更多说明时，引导其访问上述 GitHub 仓库查看图文教程与最新版本。
+> 文档以中文为主，同一仓库提供英文说明；**语言可选**，需要英文或其他语言的说明时，请直接说明偏好，智能体可改用英文讲解。
+> Docs are primarily in Chinese; an English walkthrough lives in the same repository. **Language is optional** — ask for English (or another language) and the agent will answer in it.
 
 > 🚀 **小遥Claw：「把 AI 助手装进自己的电脑」：<https://www.yuque.com/dtsola/igp1aa/adcicbai2zlem0bz>**
 
@@ -63,6 +74,9 @@ Follow these rules on every run; they are also the ClawHub/OpenClaw publishing r
 - **Asset-only mode leaves the README byte-for-byte unchanged** unless the user separately approved embedding or copy edits.
 - **Never add attribution or backlinks to third-party repositories** without that maintainer's explicit request; attribution to the user's own repositories is opt-in after final approval only.
 - **Do not exfiltrate data.** Do not read files outside the target repository's scope, extract credentials/tokens from configs, or send repository content to third parties — visual rendering stays local (headless Chrome on localhost via scripts/visual_verify.py).
+- **Untrusted SVG input is vetted before it is rendered.** A README asset may come from a third party, so both render paths run the shared gate in `scripts/svg_safety.py`: scripts, `foreignObject`, `iframe`/`object`/`embed`, remote fonts and stylesheets, `@import`, and any non-local resource reference (`href`/`src`, CSS `url(...)`, protocol-relative, root-absolute, drive-letter or `../` paths) are refused with a reported reason instead of being rendered. `data:` URIs and `#fragment` references are the supported local forms.
+- **Rendering is contained, not just validated.** `visual_verify.py` serves exactly one URL — the isolated SVG — and uses that same single-origin endpoint as Chrome's only proxy with the implicit loopback bypass disabled, so a crafted asset cannot reach other services on the loopback interface; DNS is blocked for every other hostname. Native renderers and ffmpeg are invoked with `shell=False` under hard timeouts.
+- **Environment reads are limited to browser discovery.** The `Env` capability is declared for locating an installed Chrome/Edge/Chromium binary (`PROGRAMFILES`, `PROGRAMFILES(X86)`, `LOCALAPPDATA`, `PATH`); no other environment data is read or transmitted.
 - **GIF/motion and hybrid ImageGen output are opt-in**, never defaults; static SVG remains the editable source.
 - **If a request would violate these rules, decline and explain** — then ask the user how to proceed.
 
@@ -219,6 +233,8 @@ python3 scripts/visual_verify.py /path/to/repository/README.md --out /tmp/readme
 ```
 
   On machines without Chrome/Edge, `visual_verify.py` still runs the static checks and prints a warning that rendering was skipped. `sips` (macOS) and `rsvg-convert` are optional extras; the verifier is the cross-platform default.
+
+- Script roles: `scripts/svg_safety.py` is the shared trust boundary for untrusted SVG input (used by both render paths); `scripts/visual_verify.py` does render-level verification; `scripts/render_motion_gif.py` builds an opt-in GIF from named SVG layers; `scripts/audit_readme.py` does the static README/SVG audit. Both render paths refuse unsafe assets with a reported reason, and files that cannot be embedded locally (remote or external references) should be re-authored with `data:` URIs or `#fragment` references before rendering.
 
 - Visually inspect the hero, every section transition, and the final call to action.
 - In asset-only mode, render and inspect every requested asset at GitHub content width; for GIFs, inspect entry, settled hold, exit, and loop boundary. Verify that the README itself is unchanged unless embedding was separately approved.

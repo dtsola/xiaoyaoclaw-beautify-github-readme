@@ -80,7 +80,7 @@ If the composition already reads clearly after step 4, stop.
 ## Handle typography deliberately
 
 - Use system font stacks; do not load remote fonts.
-- Use `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `PingFang SC`, `Microsoft YaHei`, and `sans-serif` for general UI text. Keep both `PingFang SC` (macOS) and `Microsoft YaHei` (Windows) in the stack: GitHub visitors are mostly on Windows, and without YaHei their CJK text falls back to SimSun, which changes width and breaks your layout assumptions.
+- Use `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, and `sans-serif` for general UI text. **If — and only if — the SVG contains CJK text**, extend the stack with `PingFang SC` (macOS) and `Microsoft YaHei` (Windows) so CJK glyphs keep their intended width instead of falling back to SimSun. For Latin-only assets those families are unnecessary; choose locale-appropriate fallbacks that match the content and the audience you are writing for.
 - Use `ui-monospace`, `SFMono-Regular`, `Menlo`, and `monospace` for code and metadata.
 - Use `Georgia`, `Songti SC`, and `serif` only when an editorial or established tone fits.
 - Use size and weight for hierarchy before adding color or decoration.

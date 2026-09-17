@@ -31,8 +31,9 @@ import sys
 import tempfile
 import threading
 import xml.etree.ElementTree as ET
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 try:
     from PIL import Image
@@ -40,22 +41,27 @@ try:
 except ImportError:
     HAS_PIL = False
 
+# Shared trust boundary for untrusted SVG input; see scripts/svg_safety.py.
+try:
+    from svg_safety import is_safe_to_render, safety_issues
+except ImportError:  # allow `python3 scripts/visual_verify.py` from any cwd
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from svg_safety import is_safe_to_render, safety_issues
+
 # ---------------------------------------------------------------- discovery
 
 MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")
 HTML_IMAGE = re.compile(r"<img\b[^>]*\bsrc=[\"']([^\"']+)[\"'][^>]*>", re.I)
-UNSAFE_SVG_TAGS = {"script", "foreignObject"}
-REMOTE_FONT = re.compile(r"@font-face|fonts\.(googleapis|gstatic)\.com|<link\b[^>]*stylesheet", re.I)
-# References that would escape the isolated render sandbox: remote URLs
-# (http/https/file), protocol-relative, root-absolute, Windows-drive, or
-# parent-directory paths. Plain relative refs and data:/#fragment are allowed.
-DANGEROUS_REF = re.compile(
-    r"""(?:href|src)\s*=\s*["']\s*(?:(?:https?:|file:)?//|/|[A-Za-z]:[\\/]|\.\./)""",
-    re.I,
-)
 
 
 def find_chrome() -> str | None:
+    """Locate a Chromium-family browser binary.
+
+    Reads standard OS environment variables only (PROGRAMFILES,
+    PROGRAMFILES(X86), LOCALAPPDATA on Windows; PATH via shutil.which) to find
+    the installed browser. The declared `env` capability in SKILL.md covers
+    exactly this lookup — no other environment data is read.
+    """
     candidates = []
     if sys.platform == "win32":
         base = os.environ.get("PROGRAMFILES", r"C:\Program Files")
@@ -244,30 +250,90 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
     """Render one SVG to PNG inside a hardened sandbox. Returns (ok, err).
 
     Trust boundary: the SVG under test is treated as untrusted input (it may
-    come from a third-party repository). Four layers of isolation:
+    come from a third-party repository). Five layers of isolation:
 
-      1. The SVG is copied into a fresh, empty directory that contains nothing
-         else, and only that directory is served — the SVG cannot read sibling
-         files from the repository it came from.
-      2. JavaScript is disabled (--blink-settings=scriptEnabled=false), so any
-         <script> in the SVG is inert. SVG is static content on GitHub; it
-         never needs JS to render.
-      3. DNS resolution is blocked for every host (--host-resolver-rules), so
-         the SVG cannot pull remote fonts/images. The preview server URL uses
-         an explicit 127.0.0.1 IP so it stays reachable without DNS.
-      4. The preview server binds loopback only, on an ephemeral port.
+      1. The SVG is copied into a fresh, empty directory; nothing else from the
+         repository is reachable, so the SVG cannot read sibling files.
+      2. A static gate (svg_safety.is_safe_to_render) already refused scripts,
+         foreignObject, remote fonts, and any non-local resource reference
+         (href/src, CSS `url(...)`, `@import`).
+      3. The preview origin serves **exactly one URL**: the isolated SVG. A
+         request for any other path, host, or port is answered with 403.
+      4. That origin is also the browser's only proxy, and Chrome's implicit
+         loopback bypass is disabled (`--proxy-bypass-list=<-loopback>`), so
+         every request Chrome makes — including literal 127.0.0.1 / localhost
+         URLs and other loopback ports — passes the filter in (3). A crafted
+         SVG therefore cannot probe or call other services on the loopback
+         interface (this is the SSRF containment the previous revision lacked).
+      5. DNS resolution is blocked for every hostname (`--host-resolver-rules`),
+         so no name leaves the machine even if a reference slipped past (2).
+         Loopback stays resolvable only so the gate itself can be reached;
+         reaching it does not grant access to anything else, because the gate
+         answers 403 for every host, port and path it does not serve.
     """
     svg = svg.resolve()
+    content = svg.read_bytes()
     with tempfile.TemporaryDirectory(prefix="vverify-serve-") as td:
         serve_dir = Path(td)
         isolated = serve_dir / svg.name
         shutil.copy2(svg, isolated)
-        class QuietHandler(SimpleHTTPRequestHandler):
-            def __init__(self, *a, **kw):
-                super().__init__(*a, directory=str(serve_dir), **kw)
+
+        class GateOriginHandler(BaseHTTPRequestHandler):
+            """Serve only the isolated SVG; refuse everything else.
+
+            Because this handler doubles as Chrome's proxy, `self.path` may be
+            an absolute URI (`GET http://host:port/path`). Requests that are
+            not for the single allowed origin+path are rejected, so the
+            rendering browser has no route to any other service.
+            """
+
+            protocol_version = "HTTP/1.0"
+            allowed_path = f"/{isolated.name}"
+
+            def _reject(self) -> None:
+                body = b"blocked by visual_verify render sandbox\n"
+                self.send_response(403)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def _request_target(self) -> tuple[str, str] | None:
+                target = self.path
+                if "://" in target:
+                    parts = urlsplit(target)
+                    return parts.netloc.lower(), parts.path
+                return None, target
+
+            def do_GET(self) -> None:  # noqa: N802 (http.server API)
+                netloc, path = self._request_target()
+                allowed = (
+                    netloc in (None, f"127.0.0.1:{self.server.server_port}")
+                    and path == self.allowed_path
+                )
+                if not allowed:
+                    self._reject()
+                    return
+                self.send_response(200)
+                self.send_header("Content-Type", "image/svg+xml")
+                self.send_header("Content-Length", str(len(content)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(content)
+
+            def do_HEAD(self) -> None:  # noqa: N802
+                self._reject()
+
+            def do_CONNECT(self) -> None:  # noqa: N802
+                self._reject()
+
+            def do_POST(self) -> None:  # noqa: N802
+                self._reject()
+
             def log_message(self, *a):  # silence access log noise
                 pass
-        server = ThreadingHTTPServer(("127.0.0.1", 0), QuietHandler)  # ephemeral port
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), GateOriginHandler)  # ephemeral port
         port = server.server_address[1]
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -281,19 +347,25 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
             cmd = [
                 chrome, "--headless", "--disable-gpu", "--hide-scrollbars",
                 "--no-first-run", "--no-default-browser-check",
-                # Network isolation: block DNS for every hostname except
-                # 127.0.0.1 (the loopback preview server, reached by explicit
-                # IP below). Scripts never reach here (is_safe_to_render gates
-                # them out), and remote resource loads are refused statically,
-                # so loopback exemption only serves the preview itself.
-                '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
+                # Every request Chrome makes — including 127.0.0.1 and localhost
+                # on any port — is forced through the single-origin gate above;
+                # `<-loopback>` removes Chrome's implicit loopback proxy bypass.
+                # Without that token a crafted asset could still reach other
+                # services bound to the loopback interface.
+                "--proxy-server=http://127.0.0.1:%d" % port,
+                "--proxy-bypass-list=<-loopback>",
+                # Second layer: no hostname resolves except loopback itself (the
+                # gate). Resolvable loopback does not imply reachable: the gate
+                # still answers 403 for every path, host, or port it does not
+                # serve.
+                "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1",
                 "--user-data-dir=" + str(tempfile.mkdtemp(prefix="chrome-vverify-")),
                 f"--window-size={w},{h}",
                 f"--screenshot={out_png}",
                 url,
             ]
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
-                                  encoding="utf-8", errors="replace")
+                                  encoding="utf-8", errors="replace", shell=False)
             if not out_png.exists() or out_png.stat().st_size == 0:
                 detail = (proc.stderr or "") + " | STDOUT: " + (proc.stdout or "")
                 return False, f"rc={proc.returncode} " + (detail.strip() or "no screenshot produced")[:400]
@@ -378,9 +450,6 @@ def audit_svg_static(path: Path) -> list[str]:
         return [f"invalid SVG XML: {exc}"]
     if "viewBox" not in root.attrib:
         issues.append("missing viewBox")
-    text = path.read_text(encoding="utf-8")
-    if REMOTE_FONT.search(text):
-        issues.append("remote font reference detected (GitHub strips remote fonts)")
     found_title = found_desc = False
     for node in root.iter():
         tag = node.tag.rsplit("}", 1)[-1]
@@ -388,34 +457,15 @@ def audit_svg_static(path: Path) -> list[str]:
             found_title = True
         if tag == "desc":
             found_desc = True
-        if tag in UNSAFE_SVG_TAGS:
-            issues.append(f"contains unsupported <{tag}>")
-    if DANGEROUS_REF.search(text):
-        issues.append("external/absolute reference detected (http, file, /, drive, or ../)")
     if not found_title:
         issues.append("missing <title>")
     if not found_desc:
         issues.append("missing <desc>")
+    # Trust-boundary problems (scripts, foreignObject, remote fonts, external or
+    # non-local resource references) come from the shared gate so both render
+    # paths report the same findings.
+    issues.extend(safety_issues(path))
     return issues
-
-
-def is_safe_to_render(path: Path) -> tuple[bool, str]:
-    """Gate before rendering: refuse to execute content that could escape the
-    sandbox (scripts, foreignObject, remote fonts, external/absolute refs).
-    Structural quality issues (viewBox/title/desc) do not block rendering."""
-    try:
-        root = ET.parse(path).getroot()
-    except ET.ParseError as exc:
-        return False, f"invalid SVG XML: {exc}"
-    for node in root.iter():
-        if node.tag.rsplit("}", 1)[-1] in UNSAFE_SVG_TAGS:
-            return False, f"contains <{node.tag.rsplit('}', 1)[-1]}>"
-    text = path.read_text(encoding="utf-8")
-    if REMOTE_FONT.search(text):
-        return False, "remote font reference"
-    if DANGEROUS_REF.search(text):
-        return False, "external/absolute reference"
-    return True, ""
 
 
 def main() -> int:

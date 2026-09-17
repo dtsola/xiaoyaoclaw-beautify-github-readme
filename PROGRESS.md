@@ -4,10 +4,14 @@ slug: xiaoyaoclaw-beautify-github-readme
 status: active
 progress: 60
 created: 2026-09-07
-updated: 2026-09-07
+updated: 2026-09-17
 docs:
   - path: docs/upgrade-plan.md
     desc: 升级改进点清单（交付状态 + 验收标准）
+  - path: docs/security-status-2026-09-17.md
+    desc: ClawHub LLM REVIEW 安全检查状态核查（v1.0.9 被新引擎判 suspicious）
+  - path: docs/evidence/security-v1.0.9-2026-09-16.json
+    desc: 原始证据（aig SARIF + skillspector 全量 issue）
 ---
 
 # xiaoyaoclaw-beautify-github-readme（README 美化技能 · OpenClaw 升级版）
@@ -42,6 +46,13 @@ docs:
 - 2026-09-07 09:2x：指挥官拍板立项（非 fork，本地 clone 上游改进，README 声明基于上游版）；clone 上游完成（55bdb1c，历史完整，工作区干净）；PROGRESS.md 落位
 - 2026-09-07 09:3x：rebrand commit b3f8427（改名/中英双语/上游声明/新 hero/清旧 branding）；指挥官确认 hero 方向 OK
 - 2026-09-07 09:4x：改进 ①②③ 开发完成——visual_verify.py（渲染+对比度+贴边，自测全量通过，抓到上游素材真实问题）；svg-production.md 补 YaHei/中英混排/双主题安全；SKILL.md §8 接入新脚本；docs/upgrade-plan.md 落位。待指挥官确认后 GitHub 建仓发布
+- 2026-09-07：v1.0.0→v1.0.9 连续迭代（安全发布战），v1.0.8 四扫描器全绿，ClawHub latest = v1.0.9（MIT-0）
+- **2026-09-17 09:57（指挥官指令：查 ClawHub LLM REVIEW 状态）**：⚠️ **未通过** —— `clawhub skill verify` 返回 `ok:false / decision:fail / reasons:[security.status_not_clean]`，security.status = **suspicious（confidence high）**，扫于 2026-09-16 11:33 UTC（引擎 **v2.4.26**，v1.0.9）
+  - **关键分歧**：moderation.verdict = **clean**（8 秒前，同引擎）vs security 证据层 **suspicious** → 页面信任标识与 verify 结论不一致
+  - 11 条命中：aig（腾讯）2 条 T09 = ① `visual_verify.py` 回环 SSRF（`EXCLUDE 127.0.0.1` 放行整个回环 + `DANGEROUS_REF` 不拦 CSS `url()`/`@import`）② `render_motion_gif.py` 无静态闸门直喂 rsvg-convert/sips（无 timeout）；skillspector 9 条 = TP4 能力描述不符（切片误判）/ OH1 输出未校验 / LP1 `env` 能力未声明 / AST4×4 subprocess（参数列表、非 shell）/ SQP-3×2 语言地区中立性
+  - **定性**：4 条真问题（SSRF 豁免 / GIF 路径缺闸门 / CSS 引用 / env 声明）+ 3 类噪音；总修复成本约 2h → 建议 v1.0.10 重扫
+  - 产出：`docs/security-status-2026-09-17.md` + 原始证据 `docs/evidence/security-v1.0.9-2026-09-16.json`（90 KB）
+  - 状态：**待指挥官决策**（是否修 → 发 v1.0.10 → 复扫 / 或走人工复核通道）
 
 ## 文档索引
 
