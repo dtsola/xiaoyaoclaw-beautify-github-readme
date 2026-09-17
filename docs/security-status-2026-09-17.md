@@ -108,6 +108,35 @@ clawhub scan --slug xiaoyaoclaw-beautify-github-readme --json # 完整扫描报�
 
 ---
 
+## 8. 修复记录（2026-09-17，指挥官批「全修」）
+
+提交 `477caac`（本地，待推送）。
+
+| 命中项 | 修复 |
+|---|---|
+| aig T09 ①（回环 SSRF） | **改架构而非改正则**：preview 端点只服务**一个 URL**，并同时充当 Chrome 的**唯一代理**；加 `--proxy-bypass-list=<-loopback>` 取消 Chrome 对 loopback 的隐式代理绕过 → 所有请求（含字面 `127.0.0.1` 与任意 loopback 端口）都必须过这道过滤器，非白名单一律 403。DNS 全域名封锁作为第二层 |
+| aig T09 ①（CSS `url()` / `@import` 未拦） | 新增 `scripts/svg_safety.py`：`url(...)` 目标在**属性与样式正文**两处扫描，非 `#fragment` / `data:` 一律拒；`@import` 直接拒 |
+| aig T09 ②（GIF 路径无闸门） | `render_motion_gif.py` 入口先 `assert_safe_to_render`，**每个派生图层渲染前再验一次**；`rsvg-convert`/`sips`/`ffmpeg` 全部 `shell=False` + 硬超时（120s / 300s），补帧目录与输出路径校验 |
+| skillspector OH1（输出未校验） | `encode_gif` 加输入/输出路径校验 + 注释说明所有进入 ffmpeg 参数的值均由本地派生（fps 1-60、colors 2-256、dither 白名单） |
+| skillspector LP1（`env` 未声明） | SKILL.md `allowed-tools` 补 `Env`，并在信任边界章节写明：仅用于定位 Chrome/Edge 二进制（`PROGRAMFILES` / `PROGRAMFILES(X86)` / `LOCALAPPDATA` / `PATH`） |
+| skillspector AST4 ×4 | `subprocess` 全部显式 `shell=False` + 参数列表 + 超时；代码注释说明非 shell 调用（属规则性命中） |
+| skillspector TP4（能力与描述不符） | 描述与 §8 补「能力由 scripts 分工实现」说明：`svg_safety.py` = 信任边界、`visual_verify.py` = 渲染级验证、`render_motion_gif.py` = GIF、`audit_readme.py` = 静态审计 |
+| skillspector SQP-3 ×2 | SKILL.md 抬头补「语言可选 + 同仓英文说明」；`svg-production.md` 的 CJK 字体指导改为**条件式**（仅当 SVG 含 CJK 文本时才加 PingFang SC / Microsoft YaHei，其余场景按受众选本地化回退） |
+
+**本地验证（真跑，非纸面）**
+
+1. 8 个构造样本（CSS `url()` 回环 / `@import` / 远程字体 / `<script>` / `foreignObject` / 远程 `image` / `file://` / `../` 遍历）→ **全部被静态闸门拒绝并给出理由**
+2. 良性样本（渐变 `url(#id)`、`data:` 图片）→ 正常放行
+3. **回环金丝雀测试**：构造 SVG 引用 `http://127.0.0.1:<canary>/canary`（绕过静态闸门直调渲染）→ 金丝雀**收到 0 次请求**（403 拦截），渲染仍成功
+4. 真实渲染回归：README 模式渲染出**有内容的 PNG**（30+ KB、采样像素确认为 SVG 背景色）→ 加固没有把渲染弄坏
+   （过程中确实先坏过一次：`MAP * ~NOTFOUND` 连代理自身地址也阻断，Chrome 根本没发请求 → 表现为"空白截图但脚本报成功"的**假通过**；已改为 `MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`，并把冒烟测试升级为"必须渲染出非白像素"以防再犯）
+5. 端到端：`audit_readme.py` 报出恶意资产；`visual_verify.py` 对恶意资产 `SKIPPED`、对良性资产渲染成功
+
+**仍待验证**：本机无 `rsvg-convert`/`sips` → GIF 全流程未真跑（静态闸门已单独验证）
+**已知遗留（非本次命中，未擅自改）**：渐变填充（`fill="url(#g)"`）在对比度检查里会被判"找不到背景矩形"→ 良性渐变 hero 会误报，建议后续单独修
+
+---
+
 ## 附：原始证据落盘
 
 - `tmp/verify_security.json`（skills-cli `skill verify` 的完整 security 段，含 aig SARIF + skillspector 全量 issue）

@@ -53,6 +53,14 @@ docs:
   - **定性**：4 条真问题（SSRF 豁免 / GIF 路径缺闸门 / CSS 引用 / env 声明）+ 3 类噪音；总修复成本约 2h → 建议 v1.0.10 重扫
   - 产出：`docs/security-status-2026-09-17.md` + 原始证据 `docs/evidence/security-v1.0.9-2026-09-16.json`（90 KB）
   - 状态：**待指挥官决策**（是否修 → 发 v1.0.10 → 复扫 / 或走人工复核通道）
+- **2026-09-17 10:1x 指挥官批「全修」→ 11 条全部落实（提交 477caac，本地待推）**
+  - 新增 `scripts/svg_safety.py`（唯一信任边界）→ 三个脚本共用；CSS `url()`/`@import` 在属性与样式正文两处扫描
+  - `visual_verify.py` 渲染沙箱重做：**单 URL 端点兼唯一代理** + `--proxy-bypass-list=<-loopback>`（取消 loopback 隐式绕过）→ 回环 SSRF 结构性关闭；DNS 全封作第二层
+  - `render_motion_gif.py`：入口+每层双重闸门、全部 `shell=False`、硬超时、帧目录/输出路径校验
+  - SKILL.md：补 `Env` 能力声明 + 脚本分工说明 + 信任边界章节 + 语言中立；`svg-production.md` CJK 字体改条件式
+  - **实测**：8 类构造样本全拒 / 2 类良性样本放行 / **回环金丝雀 0 命中** / 真实渲染回归有内容（曾因 `MAP * ~NOTFOUND` 连代理自身一起封导致"空白假通过"，已修正并把冒烟测试升级为必须渲染出非白像素）
+  - ⚠️ 本机无 rsvg-convert → GIF 全流程未真跑；渐变对比度误报列为遗留
+  - 下一步待批：发 **v1.0.10** → ClawHub 发布 → `clawhub skill verify` 复扫（另需代理恢复后推 GitHub）
 
 ## 文档索引
 
