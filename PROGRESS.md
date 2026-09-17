@@ -61,6 +61,12 @@ docs:
   - **实测**：8 类构造样本全拒 / 2 类良性样本放行 / **回环金丝雀 0 命中** / 真实渲染回归有内容（曾因 `MAP * ~NOTFOUND` 连代理自身一起封导致"空白假通过"，已修正并把冒烟测试升级为必须渲染出非白像素）
   - ⚠️ 本机无 rsvg-convert → GIF 全流程未真跑；渐变对比度误报列为遗留
   - 下一步待批：发 **v1.0.10** → ClawHub 发布 → `clawhub skill verify` 复扫（另需代理恢复后推 GitHub）
+- **2026-09-17 10:5x 第二轮（指挥官：SkillSpector 9 条全修且不影响功能）→ 提交 f6fcfa6**
+  - **AST4 ×4 → 1**：外部进程全部收拢到 `svg_safety.run_external()`（唯一入口，`shell=False` + 参数列表 + 硬超时 + 错误摘要）；全仓 `subprocess.run` 调用点 4 → 1（grep 已验）
+  - **两个真功能 bug 顺手修**：① 渐变 `fill="url(#g)"` 被判"无背景"→ 良性渐变 hero 直接失败 → 现区分 `[notice]`（不可机器判定）与真 failure，渐变 hero 退出码 0 ② 贴边检测原"主导色"判据对渐变边缘误报 93% → 改为**中位色 + 偏差 >48/255 且占比 >6%**，实测渐变干净通过、2px 红条跨顶边**仍报 edge failure**
+  - **相对路径 `--out` 修复**：Chrome `--screenshot` 不吃相对路径（报"系统找不到指定的路径"）→ 统一 `resolve()`
+  - **GIF 全流程真跑**（本机用 ImageMagick 顶替缺失的 rsvg-convert，走真实 `build_frames`/`encode_gif`）：7 帧 / 12 FPS / 3.5 KB / 像素正确 ✅ → 证明 OH1 那轮改动没破坏功能
+  - 三份提交在本地：`477caac`（安全修复）+ `ae77d38`（证据）+ `f6fcfa6`（入口收拢 & 误报修复）
 
 ## 文档索引
 
