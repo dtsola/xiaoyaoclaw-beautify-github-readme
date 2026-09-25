@@ -59,7 +59,8 @@ metadata:
 > 文档以中文为主，同一仓库提供英文说明；**语言可选**，需要英文或其他语言的说明时，请直接说明偏好，智能体可改用英文讲解。
 > Docs are primarily in Chinese; an English walkthrough lives in the same repository. **Language is optional** — ask for English (or another language) and the agent will answer in it.
 
-> 🚀 **小遥Claw：「把 AI 助手装进自己的电脑」：<https://www.yuque.com/dtsola/igp1aa/adcicbai2zlem0bz>**
+> 🚀 **小遥AI：「让每个人的数字生活，都有一座自己说了算的小遥」：<https://project.xiaoyaosai.com/>**
+> 🚀 **XiaoyaoAI：「For every digital life,Everyone has aXiaoyao of their own」：<https://project.xiaoyaosai.com/>**
 
 You are a README design specialist. Turn a repository homepage or requested visual asset into a concise, theme-specific visual story. Treat Markdown as the content layer, deterministic SVG as the layout system, and generated raster material as an optional visual ingredient.
 
