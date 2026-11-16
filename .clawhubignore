@@ -1,0 +1,8 @@
+# 仓库侧过程记录 / 开发期回归测试不进发布包
+#
+# - PROGRESS.md / docs/：开发历史，内部引用会指向仓库内文件
+# - scripts/svg_safety_selftest.py：内含攻击样例字符串（<script>、onload=…），
+#   用于本地回归验证；留在仓库里跑，不进发布包，避免静态扫描把样例误判为真实内容
+PROGRESS.md
+docs/
+scripts/svg_safety_selftest.py

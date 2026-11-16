@@ -43,7 +43,9 @@ Checks
 
 from __future__ import annotations
 
+import os
 import re
+import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -200,22 +202,93 @@ def assert_safe_to_render(path: Path) -> None:
         )
 
 
-def _is_allowed_binary(exe: str) -> bool:
-    """True only for the renderers/encoders this skill is allowed to launch.
+ALLOWED_STEMS = {
+    # 浏览器
+    "chrome", "chromeheadlessshell", "chromium", "chromiumbrowser",
+    "googlechrome", "googlechromestable", "msedge", "microsoftedge",
+    "microsoftedge", "edge",
+    # 渲染 / 编码工具
+    "ffmpeg", "rsvgconvert", "sips",
+}
 
-    Checked by **stem**, case-insensitively, with the platform's executable
-    suffixes stripped (`.exe`/`.cmd`/`.bat`) and spaces/underscores removed —
-    macOS ships the binaries as `Google Chrome` and `Microsoft Edge`, whose
-    stems contain a space. An allowlist — not a denylist — because the point is
-    that no other program can ever be started through this path, whatever a
-    document, README, or compromised config may contain.
+# 允许的安装根（对着 **解析后的真实路径** 比对）。刻意写得具体：只放行
+# 浏览器/工具的常规安装位置，而不是整个用户目录——否则一份被审计仓库里
+# 放个 `chrome.exe` 就能冒充。
+ALLOWED_ROOTS = (
+    # Windows：Program Files 下的浏览器 / 包管理器
+    r"\program files\google\chrome",
+    r"\program files (x86)\google\chrome",
+    r"\program files\microsoft\edge",
+    r"\program files (x86)\microsoft\edge",
+    r"\program files\chromium",
+    r"\programdata\chocolatey",
+    r"\scoop\apps",
+    # Windows：用户级安装（仅这几个具体子目录）
+    r"\appdata\local\google\chrome",
+    r"\appdata\local\microsoft\edge",
+    r"\appdata\local\chromium",
+    # macOS / Linux
+    "/applications/google chrome.app/",
+    "/applications/microsoft edge.app/",
+    "/applications/chromium.app/",
+    "/usr/bin/",
+    "/usr/local/bin/",
+    "/opt/",
+    "/snap/",
+    "/nix/store/",
+)
+
+
+def _under_allowed_root(real: Path) -> bool:
+    """真实路径是否落在已知安装根下（Windows / POSIX 两种写法都比）。"""
+    posix = real.as_posix().lower()
+    win = str(real).lower().replace("/", "\\")
+    return any(root in posix or root in win for root in ALLOWED_ROOTS)
+
+
+def _normalized_stem(name: str) -> str:
+    stem = name.lower().replace(" ", "").replace("_", "").replace("-", "")
+    for suffix in (".exe", ".cmd", ".bat"):
+        if stem.endswith(suffix):
+            return stem[: -len(suffix)]
+    return stem
+
+
+def _is_allowed_binary(exe: str) -> bool:
+    """True only for a renderer/encoder this skill is allowed to launch.
+
+    Checks **identity, not just the name**:
+      1. 裸命令名先在白名单内解析成绝对路径（`shutil.which`），否则拒绝；
+      2. 必须是存在的普通文件；
+      3. 解析后的 **真实路径** 必须落在已知安装根下（防符号链接绕道）；
+      4. 归一化后的可执行名必须在白名单内。
+    仅在旁边放一个叫 `chrome.exe` 的文件不会被放行 —— 这正是要害：被审计的
+    仓库不能替换掉真正要执行的程序。
     """
-    stem = Path(exe).stem.lower().replace(" ", "").replace("_", "").replace("-", "")
-    return stem in {
-        "chrome", "chromeheadlessshell", "chromium", "chromiumbrowser",
-        "googlechrome", "googlechromestable", "msedge", "microsoftedge",
-        "ffmpeg",
-    }
+    if not isinstance(exe, str) or not exe.strip():
+        return False
+    exe = exe.strip()
+    if not os.path.dirname(exe):                      # 裸名：只在白名单内解析
+        if _normalized_stem(exe) not in ALLOWED_STEMS:
+            return False
+        exe = shutil.which(exe) or ""
+        if not exe:
+            return False
+    try:
+        p = Path(exe)
+    except (TypeError, ValueError):
+        return False
+    if not p.is_absolute():
+        return False
+    try:
+        real = p.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    if not real.is_file():
+        return False
+    if _normalized_stem(real.name) not in ALLOWED_STEMS:
+        return False
+    return _under_allowed_root(real)
 
 
 def run_external(
