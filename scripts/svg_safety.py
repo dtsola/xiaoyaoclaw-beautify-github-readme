@@ -211,39 +211,60 @@ ALLOWED_STEMS = {
     "ffmpeg", "rsvgconvert", "sips",
 }
 
-# 允许的安装根（对着 **解析后的真实路径** 比对）。刻意写得具体：只放行
-# 浏览器/工具的常规安装位置，而不是整个用户目录——否则一份被审计仓库里
-# 放个 `chrome.exe` 就能冒充。
+# 允许的安装根 —— **绝对目录**，判定方式是「解析后的真实路径是否位于该目录之下」
+# （Path 包含关系），不是字符串里出现过某个片段。写具体子目录而非整个用户目录：
+# 否则被审计仓库里放一个 `chrome.exe` 就能冒充。
 ALLOWED_ROOTS = (
     # Windows：Program Files 下的浏览器 / 包管理器
-    r"\program files\google\chrome",
-    r"\program files (x86)\google\chrome",
-    r"\program files\microsoft\edge",
-    r"\program files (x86)\microsoft\edge",
-    r"\program files\chromium",
-    r"\programdata\chocolatey",
-    r"\scoop\apps",
+    r"C:\Program Files\Google\Chrome",
+    r"C:\Program Files (x86)\Google\Chrome",
+    r"C:\Program Files\Microsoft\Edge",
+    r"C:\Program Files (x86)\Microsoft\Edge",
+    r"C:\Program Files\Chromium",
+    r"C:\ProgramData\chocolatey",
     # Windows：用户级安装（仅这几个具体子目录）
-    r"\appdata\local\google\chrome",
-    r"\appdata\local\microsoft\edge",
-    r"\appdata\local\chromium",
+    r"%LOCALAPPDATA%\Google\Chrome",
+    r"%LOCALAPPDATA%\Microsoft\Edge",
+    r"%LOCALAPPDATA%\Chromium",
+    r"%USERPROFILE%\scoop\apps",
     # macOS / Linux
-    "/applications/google chrome.app/",
-    "/applications/microsoft edge.app/",
-    "/applications/chromium.app/",
-    "/usr/bin/",
-    "/usr/local/bin/",
-    "/opt/",
-    "/snap/",
-    "/nix/store/",
+    "/Applications/Google Chrome.app",
+    "/Applications/Microsoft Edge.app",
+    "/Applications/Chromium.app",
+    "/usr/bin",
+    "/usr/local/bin",
+    "/opt/google",
+    "/snap/chromium",
+    "/snap/bin",
+    "/nix/store",
 )
 
 
+def _expand_root(raw: str) -> Path:
+    """把安装根展开成绝对路径（支持 %LOCALAPPDATA% 这类占位）。"""
+    expanded = os.path.expandvars(os.path.expanduser(raw))
+    try:
+        return Path(expanded).resolve()
+    except OSError:
+        return Path(expanded).absolute()
+
+
 def _under_allowed_root(real: Path) -> bool:
-    """真实路径是否落在已知安装根下（Windows / POSIX 两种写法都比）。"""
-    posix = real.as_posix().lower()
-    win = str(real).lower().replace("/", "\\")
-    return any(root in posix or root in win for root in ALLOWED_ROOTS)
+    """真实路径是否**确实位于**某个已知安装目录之下。
+
+    用路径包含关系（`root` 是 `real` 的祖先目录）而不是子串匹配：
+    子串匹配会把 `/tmp/repo/opt/chrome` 当成落在 `/opt/` 下——那正是
+    "仓库里的同名可执行文件冒充已安装工具" 的入口。
+    """
+    try:
+        real = real.resolve()
+    except OSError:
+        return False
+    for raw in ALLOWED_ROOTS:
+        root = _expand_root(raw)
+        if real == root or root in real.parents:
+            return True
+    return False
 
 
 def _normalized_stem(name: str) -> str:
@@ -291,6 +312,30 @@ def _is_allowed_binary(exe: str) -> bool:
     return _under_allowed_root(real)
 
 
+def _validate_argv(command, label: str) -> list[str]:
+    """把调用方的参数列表校验成一份**可安全启动**的 argv。
+
+    每个参数都必须是字符串、非空、不含 NUL / 换行（这两类字符在跨平台进程
+    边界上语义最不可控），并有长度上限。任何一项不合格就整体拒绝，不做
+    "过滤后继续"——静默改写参数会让调用方以为执行了另一条命令。
+    配合 `shell=False` 与显式参数列表，杜绝命令注入与元字符展开。
+    """
+    if not isinstance(command, (list, tuple)) or not command:
+        raise SystemExit(f"ERROR: {label}: invalid argument list")
+    argv: list[str] = []
+    for part in command:
+        if not isinstance(part, str):
+            raise SystemExit(f"ERROR: {label}: non-string argument {part!r}")
+        if not part:
+            raise SystemExit(f"ERROR: {label}: empty argument")
+        if "\x00" in part or "\n" in part or "\r" in part:
+            raise SystemExit(f"ERROR: {label}: argument contains control characters")
+        if len(part) > 4096:
+            raise SystemExit(f"ERROR: {label}: argument too long ({len(part)} chars)")
+        argv.append(part)
+    return argv
+
+
 def run_external(
     command: list[str],
     *,
@@ -310,21 +355,20 @@ def run_external(
     Raises SystemExit when the tool is missing, times out, or exits non-zero
     (with check=True).
     """
-    if not command or not all(isinstance(part, str) for part in command):
-        raise SystemExit(f"ERROR: {label}: invalid argument list")
+    argv = _validate_argv(command, label)
     # Only known binaries may be launched. The executable path comes from local
     # browser discovery (or an absolute path the user pointed at), never from
     # document/README content, so a repository under review cannot introduce a
     # different program here.
-    if not _is_allowed_binary(command[0]):
+    if not _is_allowed_binary(argv[0]):
         raise SystemExit(
             f"ERROR: {label}: refusing to launch unrecognised executable "
-            f"{Path(command[0]).name!r} — only Chrome/Edge/Chromium/ffmpeg are permitted"
+            f"{Path(argv[0]).name!r} — only Chrome/Edge/Chromium/ffmpeg are permitted"
         )
 
     try:
         return subprocess.run(
-            command,
+            argv,
             check=check,
             shell=False,
             capture_output=True,

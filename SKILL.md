@@ -40,6 +40,8 @@ allowed-tools:
   - Grep
   - Bash
   - Env
+  - WebFetch
+  - Browser
 permissions:
   read:
     - 目标仓库内的 README / 资源文件 / 前端源文件（用于理解项目与定位素材）
