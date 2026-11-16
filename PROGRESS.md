@@ -79,3 +79,24 @@ docs:
 | 文档 | 说明 |
 |------|------|
 | docs/upgrade-plan.md | 改进点明细 + 交付状态 + 验收标准 |
+
+## 2026-11-16 v1.0.15 → v1.0.18：ClawScan 新引擎下的安全整改（渲染沙箱三层加固）
+
+- **触发**：banner 换版后重发，ClawScan v2.4.27 判 v1.0.14 `suspicious`（skillspector 74/HIGH，4 项）
+- **整改 1｜SVG 闸门漏可执行形态**（v1.0.15）
+  - 判词：`svg_safety.py` 接受 `onload` 等事件处理器；SMIL `<set attributeName="onload">` 同样能装事件
+  - 修：拒绝全部 `on*` 属性 + 拒绝 SMIL 往 `on*` 装值；新增 `scripts/svg_safety_selftest.py`（11 例回归，含 6 类可执行形态）
+  - 另加运行时两层：响应头严格 CSP（`script-src/connect-src 'none'`）、Chrome `--blink-settings=scriptEnabled=false`
+- **整改 2｜声明范围写窄了（自伤）**（v1.0.15 → v1.0.16）
+  - 首版 `permissions.network` 写「不访问互联网」，但工作流本就要读用户给出的 GitHub 页面 → 被判 description-behavior mismatch，**分数反升到 91**
+  - 修：如实写两段（本地回环渲染 + 用户提供链接时读取该页面），并补 `allowed-tools: WebFetch / Browser`
+- **整改 3｜可执行文件校验名不副实**（v1.0.16 → v1.0.17）
+  - 首版只比文件名 stem，判词：`/tmp/repo/opt/chrome` 这类路径也能通过
+  - 修：白名单裸名先 `shutil.which` 解析 → 必须绝对路径 + 真实普通文件 + `realpath` 落在具体安装根 + 归一化名比对；补齐 `rsvg-convert` / `sips`
+  - 再修：安装根判定从**子串匹配**改为**路径真实包含关系**（`root in real.parents`），并用 6 组对照测试验证（含判词给出的 `/tmp/repository/opt/chrome` 反例）
+  - `run_external` 增 `_validate_argv`（类型/非空/无 NUL 与换行/长度上限）
+- **整改 4｜安装命令被当成运行期行为**（v1.0.18）
+  - 判词把 README 的 `git clone <固定仓库>` 读成「运行期访问固定仓库 + 完整检出」
+  - 修：README 中英双语明确「以下命令由用户手动执行，不属于技能运行期行为」；`permissions.environment` 补 `USERPROFILE`
+- **结果**：**v1.0.18 `security.status = clean`，skillspector 亦 clean（score 9 / LOW，1 条 note）**，LLM clean
+- **教训**：①声明权限「写窄」不是更安全，而是被判言行不一致（两次踩）；②**子串匹配不是边界**——路径判定必须用真实包含关系；③文档里的示例代码会被当实现审计：示例要么受控、要么移出发布包
