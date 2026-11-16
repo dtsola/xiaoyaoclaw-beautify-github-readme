@@ -40,6 +40,18 @@ allowed-tools:
   - Grep
   - Bash
   - Env
+permissions:
+  read:
+    - 目标仓库内的 README / 资源文件 / 前端源文件（用于理解项目与定位素材）
+  write:
+    - 目标仓库内的 README 与素材文件（仅在用户明确授权后；纯素材模式不改 README）
+    - 渲染验证产物（PNG / 报告），写入临时目录或用户指定目录
+  network: |
+    仅本地回环：visual_verify.py 在 127.0.0.1 的临时端口起一个只服务**单个 SVG** 的
+    HTTP 服务，并把该地址设为无头 Chrome 的唯一代理（关闭隐式回环绕过、其余域名一律
+    MAP ~NOTFOUND）；除这一个 origin 外不产生任何网络请求，不访问互联网、不上传任何内容。
+  environment:
+    - PROGRAMFILES / PROGRAMFILES(X86) / LOCALAPPDATA / PATH（仅用于定位已安装的 Chrome/Edge/Chromium 可执行文件）
 metadata:
   openclaw:
     requires:

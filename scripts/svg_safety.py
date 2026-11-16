@@ -36,6 +36,9 @@ Checks
    are refused. Plain sibling-relative references are permitted but unresolvable
    — they resolve to the throwaway preview origin, which serves exactly one file.
 5. No CSS `@import` (always an out-of-band fetch).
+6. No event-handler attributes (`onload`, `onclick`, …) and no SMIL animation
+   that installs one (`<set attributeName="onload" …>`): a renderer that honours
+   them would execute script inside the preview origin.
 """
 
 from __future__ import annotations
@@ -80,6 +83,13 @@ EXTERNAL_TARGET = r"""(?i)^(?:(?:https?|file|ftp|javascript|vbscript|blob):|//|/
 # Any @import at all — it is always an out-of-band fetch.
 IMPORT_RULE = r"@import\b"
 
+# Event-handler attributes (onload, onclick, onerror, …). SVG has no standard
+# non-event attribute with an `on` prefix, so anything matching this is refused.
+EVENT_HANDLER_ATTR = re.compile(r"^on[a-z]", re.I)
+
+# SMIL animation elements that can install an attribute on another element.
+SMIL_ELEMENTS = {"set", "animate", "animateTransform", "animateMotion"}
+
 
 def _local_tag(tag: str) -> str:
     """Return the local name of a possibly namespaced tag."""
@@ -105,10 +115,20 @@ def safety_issues(path: Path) -> list[str]:
         tag = _local_tag(node.tag)
         if tag in UNSAFE_SVG_TAGS:
             issues.append(f"contains <{tag}>")
+        if tag in SMIL_ELEMENTS:
+            target_attr = ""
+            for key, val in node.attrib.items():
+                if _local_tag(key).lower() == "attributename":
+                    target_attr = str(val).strip()
+                    break
+            if target_attr and EVENT_HANDLER_ATTR.match(target_attr):
+                issues.append(f"SMIL animation installs event handler: {target_attr}")
         for name, value in node.attrib.items():
             if not isinstance(value, str) or not value.strip():
                 continue
             local = _local_tag(name).lower()
+            if EVENT_HANDLER_ATTR.match(local):
+                issues.append(f"event-handler attribute {_local_tag(name)}")
             if local in REF_ATTRS:
                 if re.match(EXTERNAL_TARGET, value.strip()):
                     issues.append(
@@ -180,6 +200,24 @@ def assert_safe_to_render(path: Path) -> None:
         )
 
 
+def _is_allowed_binary(exe: str) -> bool:
+    """True only for the renderers/encoders this skill is allowed to launch.
+
+    Checked by **stem**, case-insensitively, with the platform's executable
+    suffixes stripped (`.exe`/`.cmd`/`.bat`) and spaces/underscores removed —
+    macOS ships the binaries as `Google Chrome` and `Microsoft Edge`, whose
+    stems contain a space. An allowlist — not a denylist — because the point is
+    that no other program can ever be started through this path, whatever a
+    document, README, or compromised config may contain.
+    """
+    stem = Path(exe).stem.lower().replace(" ", "").replace("_", "").replace("-", "")
+    return stem in {
+        "chrome", "chromeheadlessshell", "chromium", "chromiumbrowser",
+        "googlechrome", "googlechromestable", "msedge", "microsoftedge",
+        "ffmpeg",
+    }
+
+
 def run_external(
     command: list[str],
     *,
@@ -201,6 +239,15 @@ def run_external(
     """
     if not command or not all(isinstance(part, str) for part in command):
         raise SystemExit(f"ERROR: {label}: invalid argument list")
+    # Only known binaries may be launched. The executable path comes from local
+    # browser discovery (or an absolute path the user pointed at), never from
+    # document/README content, so a repository under review cannot introduce a
+    # different program here.
+    if not _is_allowed_binary(command[0]):
+        raise SystemExit(
+            f"ERROR: {label}: refusing to launch unrecognised executable "
+            f"{Path(command[0]).name!r} — only Chrome/Edge/Chromium/ffmpeg are permitted"
+        )
 
     try:
         return subprocess.run(

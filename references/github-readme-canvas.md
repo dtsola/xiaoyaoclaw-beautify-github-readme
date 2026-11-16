@@ -68,7 +68,19 @@ assets/readme/
     └── hero-prompt.txt
 ```
 
-Use lowercase hyphenated names. Remove discarded variants before publishing unless the user wants to retain source explorations.
+Use lowercase hyphenated names.
+
+**Discarded variants are never deleted silently.** Deleting an asset removes a file the
+user may still want (source explorations, alternative directions, material for a later
+iteration). Before removing anything, list the exact files, say they will be deleted, and
+ask which ones to keep:
+
+- Default when the user has not answered: **keep everything** (a few KB of unused assets
+  is cheaper than an unrecoverable deletion).
+- Preferred over deletion: move rejected variants into `assets/source/` (or leave them)
+  so the text stays editable.
+- Only delete after explicit confirmation of the specific file list — and never delete
+  the last copy of a generated source (`*.svg`, prompt files) whose raster output is kept.
 
 ## Accessibility and trust
 

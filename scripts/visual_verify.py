@@ -332,6 +332,15 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
                 self.send_header("Content-Type", "image/svg+xml")
                 self.send_header("Content-Length", str(len(content)))
                 self.send_header("Cache-Control", "no-store")
+                # 第二道防线（静态闸门之外的运行时防线）：即使某个事件处理器
+                # 漏过了 svg_safety，CSP 也不允许执行任何脚本、发起任何连接。
+                self.send_header(
+                    "Content-Security-Policy",
+                    "default-src 'none'; img-src data:; style-src 'unsafe-inline'; "
+                    "script-src 'none'; connect-src 'none'; font-src 'none'; "
+                    "frame-src 'none'; object-src 'none'; base-uri 'none'; "
+                    "form-action 'none'",
+                )
                 self.end_headers()
                 self.wfile.write(content)
 
@@ -373,6 +382,11 @@ def render_svg(svg: Path, chrome: str, out_png: Path) -> tuple[int, str]:
                 # still answers 403 for every path, host, or port it does not
                 # serve.
                 "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1",
+                # Third layer: JavaScript disabled at the engine level, so an
+                # event handler that slipped past both the static gate and the
+                # CSP has nothing to execute in.
+                "--blink-settings=scriptEnabled=false",
+                "--disable-javascript",
                 "--user-data-dir=" + str(tempfile.mkdtemp(prefix="chrome-vverify-")),
                 f"--window-size={w},{h}",
                 f"--screenshot={out_png}",
