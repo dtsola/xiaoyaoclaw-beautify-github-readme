@@ -60,6 +60,12 @@ The same method grows different visuals on different projects — CLIs use comma
 
 ## Install
 
+> ⚠️ The commands below are run **by you, in your own terminal**. They are not skill
+> runtime behaviour: the skill never clones a repository, never installs anything over
+> the network, and never writes outside the target repo's README/assets. At runtime its
+> only network access is the 127.0.0.1 loopback used for rendering, plus the page **you**
+> point it at.
+
 This repository *is* the skill package (Agent Skills layout, SKILL.md at the root):
 
 ```bash

@@ -58,7 +58,7 @@ permissions:
        不遍历）；只读展示，不上传、不回传任何本地内容。
     除此之外不访问互联网；渲染过程不上传任何素材或仓库内容。
   environment:
-    - PROGRAMFILES / PROGRAMFILES(X86) / LOCALAPPDATA / PATH（仅用于定位已安装的 Chrome/Edge/Chromium 可执行文件）
+    - PROGRAMFILES / PROGRAMFILES(X86) / LOCALAPPDATA / USERPROFILE / PATH（仅用于定位已安装的 Chrome/Edge/Chromium 可执行文件；USERPROFILE 用于展开用户级安装目录，如 %USERPROFILE%\scoop\apps）
 metadata:
   openclaw:
     requires:
